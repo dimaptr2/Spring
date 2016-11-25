@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/beaglesrv.iml" filepath="$PROJECT_DIR$/.idea/modules/beaglesrv.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/beaglesrv_main.iml" filepath="$PROJECT_DIR$/.idea/modules/beaglesrv_main.iml" group="beaglesrv" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/beaglesrv_test.iml" filepath="$PROJECT_DIR$/.idea/modules/beaglesrv_test.iml" group="beaglesrv" />
+    </modules>
+  </component>
+</project>

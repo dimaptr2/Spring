@@ -1,0 +1,140 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ru.velkomfood.mysap.mrp</groupId>
+  <artifactId>mrpserver</artifactId>
+  <packaging>jar</packaging>
+  <version>1.1</version>
+
+  <name>Access Control System</name>
+  <url>http://maven.apache.org</url>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.4.1.RELEASE</version>
+  </parent>
+
+  <properties>
+    <maven.compiler.version>3.5.1</maven.compiler.version>
+    <maven.jar.version>2.6</maven.jar.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>1.8</java.version>
+    <customer.classpath.prefix>/home/dpetrov/.m2/repository</customer.classpath.prefix>
+    <lib.dir>/usr/sap/JCo</lib.dir>
+  </properties>
+
+  <!-- Dependency section -->
+
+  <dependencies>
+
+     <!-- Springframework dependencies -->
+    <!-- Spring boot web starter without Tomcat server -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Undertow spring boot starter -->
+     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-undertow</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- Templater -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-freemarker</artifactId>
+    </dependency>
+
+      <!-- JDBC API -->
+    <!--<dependency>-->
+      <!--<groupId>org.springframework.boot</groupId>-->
+      <!--<artifactId>spring-boot-starter-jdbc</artifactId>-->
+    <!--</dependency>-->
+
+    <!-- Spring boot starter Java Persistence API -->
+    <!--<dependency>-->
+      <!--<groupId>org.springframework.boot</groupId>-->
+      <!--<artifactId>spring-boot-starter-data-jpa</artifactId>-->
+    <!--</dependency>-->
+
+    <!-- SQLite JDBC -->
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+    </dependency>
+    
+    <!-- SAP Java Connector (local file dependency) -->
+    <dependency>
+      <groupId>sapjco3</groupId>
+      <artifactId>sapjco3</artifactId>
+      <scope>system</scope>
+      <version>3.0</version>
+      <systemPath>${lib.dir}/sapjco3.jar</systemPath>
+    </dependency>
+
+  </dependencies>
+
+
+  <!-- Additional repositories -->
+<repositories>
+
+  <repository>
+    <id>spring-releases</id>
+    <url>https://repo.spring.io/libs-release</url>
+  </repository>
+
+</repositories>
+
+  <pluginRepositories>
+    <!-- Spring plugin repository -->
+    <pluginRepository>
+      <id>spring-releases</id>
+      <url>https://repo.spring.io/libs-release</url>
+    </pluginRepository>
+  </pluginRepositories>
+  
+   <!-- Build options -->
+
+  <build>
+
+    <plugins>
+
+     <!-- Maven plugins -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven.jar.version}</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Class-Path>${lib.dir}/sapjco3.jar</Class-Path>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Spring Uber-jar file -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      
+    </plugins>
+
+  </build>
+
+</project>

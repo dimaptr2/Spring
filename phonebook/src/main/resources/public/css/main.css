@@ -1,0 +1,67 @@
+/* ----- Basic settings ------ */
+
+body {
+    background: AliceBlue;
+    color: Black;
+    font-family: Serif, Sans-serif, Monospace;
+}
+
+.header-style {
+    text-align: center;
+    text-shadow:4px 8px 8px SlateGray;
+}
+
+/* Positions */
+
+.left {
+    float: left;
+    width: 300px;
+    background-color: SkyBlue;
+    text-shadow:4px 8px 8px SlateGray;
+}
+
+.right {
+    float: right;
+    width: 300px;
+    background-color: SkyBlue;
+    text-shadow:4px 8px 8px SlateGray;
+}
+
+.center {
+    margin: auto;
+    float: center;
+    width: 45%;
+    border: 1px;
+    padding: 10px;
+    background-color: SkyBlue;
+    text-shadow:4px 8px 8px SlateGray;
+}
+
+/* Command buttons, forms, tables */
+
+.command-link-style {
+    color: Black;
+}
+
+.submit-button {
+    background-color: WhiteSmoke;
+    color: black;
+    border: 1px solid WhiteSmoke;
+    text-shadow:4px 8px 8px SlateGray;
+}
+
+.output-table {
+    border: 1px solid WhiteSmoke;
+    border-collapse: collapse;
+    text-align: left;
+    text-shadow:4px 8px 8px SlateGray;
+}
+
+.tab-center-align {
+    text-align: center;
+}
+
+.tab-left-align {
+    text-align: left;
+}
+

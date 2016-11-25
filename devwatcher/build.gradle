@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "http://repo.spring.io/snapshot"
+        }
+        maven {
+            url "http://repo.spring.io/milestone"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.5.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+    version = '1.1'
+    baseName = 'devwatcher'
+    manifest {
+        attributes( 'Class-Path': "/usr/sap/JCo/sapjco3.jar")
+    }
+}
+
+
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/usr/sap/JCo'
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+
+    // tag::jetty[]
+
+//     This is a simple spring framework starter
+//    compile("org.springframework.boot:spring-boot-starter-web") {
+//        exclude module: "spring-boot-starter-tomcat"
+//    }
+
+    // Springframework boot starter with the providing of Web MVC
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    // end::jetty[]
+
+    // tag::actuator[]
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    // end::actuator[]
+
+    // SQlite JDBC
+    compile("org.xerial:sqlite-jdbc:3.8.11.2")
+    // tag::junit[]
+    testCompile("junit:junit")
+    // end::junit[]
+
+    // additional Spring framework dependencies
+    // tag::add Spring[]
+
+    compile("org.springframework:spring-jdbc")
+    // end::add Spring[]
+
+    // Oracle-Sun mail sender
+    compile("com.sun.mail:javax.mail:1.5.5")
+
+    // SAP Java connector dependency points to the local directory
+    compile fileTree(dir: '/usr/sap/JCo', include: ['*.jar'])
+
+}

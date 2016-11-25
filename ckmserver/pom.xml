@@ -1,0 +1,150 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ru.velkomfood.copc.ckm.server</groupId>
+  <artifactId>ckmserver</artifactId>
+  <packaging>jar</packaging>
+  <version>1.1</version>
+  <name>absence Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.4.0.RELEASE</version>
+  </parent>
+  
+  <properties>
+    <maven.compiler.version>3.5.1</maven.compiler.version>
+    <maven.jar.version>2.6</maven.jar.version>
+    <java.version>1.8</java.version>
+    <main.package>ru.velkomfood.copc.ckm.server</main.package>
+    <maven.local.repo>C:/Users/DPETROV/.m2/repository</maven.local.repo>
+    <lib.dir>C:/usr/sap/jco</lib.dir>
+  </properties>
+
+  <dependencies>
+
+    <!-- http://mvnrepository.com/artifact/junit/junit -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+
+    <!-- SAP Java Connector (local file dependency) -->
+    <dependency>
+      <groupId>sapjco3</groupId>
+      <artifactId>sapjco3</artifactId>
+      <scope>system</scope>
+      <version>3.0</version>
+      <systemPath>${lib.dir}/sapjco3.jar</systemPath>
+    </dependency>
+	
+    <!-- Springframework dependencies -->
+    <!-- Spring boot web starter without Tomcat server -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Jetty spring boot starter -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-undertow</artifactId>
+    </dependency>
+
+	<!-- http://mvnrepository.com/artifact/com.h2database/h2 -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+    </dependency>
+	
+    <!-- http://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+    </dependency>
+
+  </dependencies>
+
+
+  <!-- Additional repositories -->
+  <repositories>
+
+    <repository>
+      <id>spring-releases</id>
+      <name>Spring Releases</name>
+      <url>https://repo.spring.io/libs-release</url>
+    </repository>
+
+  </repositories>
+
+  <pluginRepositories>
+
+    <pluginRepository>
+      <id>spring-releases</id>
+      <name>Spring Releases</name>
+      <url>https://repo.spring.io/libs-release</url>
+    </pluginRepository>
+
+  </pluginRepositories>
+
+<!-- Build options -->
+  <build>
+
+    <plugins>
+
+      <!-- Maven plugins -->
+
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-compiler-plugin</artifactId>-->
+        <!--<version>${maven.compiler.version}</version>-->
+        <!--<configuration>-->
+          <!--<source>${java.version}</source>-->
+          <!--<target>${java.version}</target>-->
+        <!--</configuration>-->
+      <!--</plugin>-->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven.jar.version}</version>
+        <configuration>
+          <archive>
+            <!--<manifest>-->
+              <!--<mainClass>${main.package}.Launcher</mainClass>-->
+              <!--<addClasspath>true</addClasspath>-->
+              <!--<classpathMavenRepositoryLayout>true</classpathMavenRepositoryLayout>-->
+              <!--<classpathPrefix>${maven.local.repo}</classpathPrefix>-->
+            <!--</manifest>-->
+            <manifestEntries>
+              <Class-Path>${lib.dir}/sapjco3.jar</Class-Path>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Spring Uber-jar file -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+</project>

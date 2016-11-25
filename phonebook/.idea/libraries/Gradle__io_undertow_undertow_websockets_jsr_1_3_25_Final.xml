@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: io.undertow:undertow-websockets-jsr:1.3.25.Final">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.undertow/undertow-websockets-jsr/1.3.25.Final/815f2b8799ed36937def6f5d27a466de3de8eadc/undertow-websockets-jsr-1.3.25.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.undertow/undertow-websockets-jsr/1.3.25.Final/11fbb1f7d7b3eeea7f54e3fcc29053c79dcb0175/undertow-websockets-jsr-1.3.25.Final-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

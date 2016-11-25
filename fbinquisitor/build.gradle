@@ -1,0 +1,75 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "http://repo.spring.io/snapshot"
+        }
+        maven {
+            url "http://repo.spring.io/milestone"
+        }
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
+    }
+
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+allprojects {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/snapshot" }
+    maven { url "http://repo.spring.io/milestone" }
+}
+
+
+dependencies {
+
+    // Spring section
+
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+
+    compile("org.springframework.boot:spring-boot-starter-undertow")
+    // end::jetty[]
+
+    // tag::actuator[]
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    // end::actuator[]
+
+    // additional Spring framework dependencies
+    // tag::add Spring[]
+
+    compile("org.springframework:spring-jdbc")
+//    // end::add Spring[]
+//
+//    // Spring JPA
+//    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+//
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+
+    // End of Spring section
+
+    // Firebird JDBC driver
+    compile("org.firebirdsql.jdbc:jaybird-jdk18:2.2.10")
+
+    // tag::junit[]
+    testCompile("junit:junit")
+    // end::junit[]
+}
+
+jar {
+    baseName = 'fbinquisitor'
+    version = '1.6'
+}
+

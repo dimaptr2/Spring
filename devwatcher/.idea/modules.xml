@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/devwatcher.iml" filepath="$PROJECT_DIR$/.idea/modules/devwatcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/devwatcher_main.iml" filepath="$PROJECT_DIR$/.idea/modules/devwatcher_main.iml" group="devwatcher" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/devwatcher_test.iml" filepath="$PROJECT_DIR$/.idea/modules/devwatcher_test.iml" group="devwatcher" />
+    </modules>
+  </component>
+</project>
