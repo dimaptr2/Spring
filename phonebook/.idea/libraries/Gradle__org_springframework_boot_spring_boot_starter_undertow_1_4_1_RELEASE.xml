@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: org.springframework.boot:spring-boot-starter-undertow:1.4.1.RELEASE">
-    <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-undertow/1.4.1.RELEASE/f81c394b079b27328bfb8dd375b3099a5d6e435a/spring-boot-starter-undertow-1.4.1.RELEASE.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
