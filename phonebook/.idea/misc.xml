@@ -45,10 +45,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectDictionaryState">
-    <dictionary name="dpetrov" />
-  </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="masterDetails">
@@ -58,7 +55,7 @@
           <splitter-proportions>
             <option name="proportions">
               <list>
-                <option value="0.2" />
+                <option value="0.3689655" />
               </list>
             </option>
           </splitter-proportions>
@@ -70,7 +67,7 @@
           <splitter-proportions>
             <option name="proportions">
               <list>
-                <option value="0.2" />
+                <option value="0.3689655" />
               </list>
             </option>
           </splitter-proportions>
@@ -93,7 +90,7 @@
           <splitter-proportions>
             <option name="proportions">
               <list>
-                <option value="0.2" />
+                <option value="0.3689655" />
               </list>
             </option>
           </splitter-proportions>
@@ -104,7 +101,7 @@
           <splitter-proportions>
             <option name="proportions">
               <list>
-                <option value="0.2" />
+                <option value="0.3689655" />
               </list>
             </option>
           </splitter-proportions>

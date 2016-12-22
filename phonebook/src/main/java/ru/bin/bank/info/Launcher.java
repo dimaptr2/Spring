@@ -1,12 +1,14 @@
-package ru.bin.bank.phonebook;
+package ru.bin.bank.info;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PhonebookApplication {
+public class Launcher {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PhonebookApplication.class, args);
+		System.getProperties().put("server.port", 9495);
+		SpringApplication.run(Launcher.class, args);
 	}
+
 }

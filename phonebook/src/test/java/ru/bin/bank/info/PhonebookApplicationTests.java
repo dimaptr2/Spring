@@ -1,4 +1,4 @@
-package ru.bin.bank.phonebook;
+package ru.bin.bank.info;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
