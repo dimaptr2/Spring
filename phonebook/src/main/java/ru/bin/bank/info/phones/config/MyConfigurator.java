@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import ru.bin.bank.info.phones.controller.DbManager;
 
 /**
- * Created by on 31.12.2016.
+ * Created by Петров Д Г on 31.12.2016.
  */
 
 @Configuration

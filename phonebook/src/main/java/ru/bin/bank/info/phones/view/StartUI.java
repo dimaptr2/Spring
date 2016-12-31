@@ -11,14 +11,14 @@ import ru.bin.bank.info.phones.controller.DbManager;
 import java.sql.SQLException;
 
 /**
- * Created on 31.12.2016.
+ * Created by Петров Д Г on 31.12.2016.
  */
 @SpringUI
 @Theme("valo")
 public class StartUI extends UI {
 
-    // Here must be a path to the database file (SQLite)
-    private final String DBPATH = "XXXXXXXXXXXXXX";
+    // C:/Users/Петров Д Г/Documents/mydb
+    private final String DBPATH = "C:/Users/Петров Д Г/Documents/mydb";
     @Autowired
     private DbManager dbManager;
     private HorizontalLayout hLayout;

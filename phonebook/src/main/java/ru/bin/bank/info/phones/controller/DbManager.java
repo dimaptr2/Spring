@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by  on 31.12.2016.
+ * Created by Петров Д Г on 31.12.2016.
  */
 public class DbManager {
 
