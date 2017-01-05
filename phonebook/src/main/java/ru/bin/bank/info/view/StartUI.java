@@ -5,7 +5,6 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.bin.bank.info.controller.DbManager;
 
 
 /**
@@ -17,7 +16,7 @@ import ru.bin.bank.info.controller.DbManager;
 public class StartUI extends UI {
 
     @Autowired
-    private DbManager db;
+    private StartController myController;
 
     private HorizontalLayout hLayoutMain;
     private VerticalLayout vLayoutLeft;

@@ -1,13 +1,11 @@
 package ru.bin.bank.info.controller;
 
 import org.springframework.stereotype.Component;
-import ru.bin.bank.info.model.Employee;
-import ru.bin.bank.info.model.Phone;
+import ru.bin.bank.info.model.TypeOfEntity;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * Created by petrovdmitry on 01.01.17.
@@ -17,7 +15,6 @@ import java.text.SimpleDateFormat;
 public class DbManager {
 
     private String url;
-    private static DbManager instance;
     private Connection connection;
 
     public DbManager() {
@@ -44,19 +41,41 @@ public class DbManager {
         }
     }
 
-    public void SaveEmployee(Employee e) throws SQLException {
+    public <T> void create(T entity, TypeOfEntity te) throws SQLException {
 
     }
 
-    public void SavePhone(Phone ph) throws SQLException {
+    public <T> T read(Long id, TypeOfEntity te) throws SQLException {
+        T entity = null;
+        return entity;
+    }
+
+    public <T> List<T> readAll(Long low, Long high, TypeOfEntity te) throws SQLException {
+
+        List<T> collection = null;
+
+        return collection;
 
     }
 
-    public void DeleteEmployee(Employee e) throws SQLException {
+    public <T> void update(T entity, TypeOfEntity te) throws SQLException {
 
     }
 
-    public void DeletePhone(Phone ph) throws SQLException {
+    public <T> void delete(T entity, TypeOfEntity te) throws SQLException {
+
+    }
+
+    public void deleteAll(Long low, Long high, TypeOfEntity te) throws SQLException {
+
+        String sql = "";
+        Statement stmt = connection.createStatement();
+
+        try {
+
+        } finally {
+            stmt.close();
+        }
 
     }
 
