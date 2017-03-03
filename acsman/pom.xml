@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.iegs.info.books</groupId>
-    <artifactId>phonebook</artifactId>
-    <version>1.10</version>
+    <groupId>ru.velkomfood.acs.manager</groupId>
+    <artifactId>acsman</artifactId>
+    <version>1.1</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -22,12 +22,12 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
         <dependency>
@@ -35,6 +35,14 @@
             <artifactId>vaadin-spring-boot-starter</artifactId>
             <version>1.2.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.firebirdsql.jdbc/jaybird-jdk18 -->
+        <dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird-jdk18</artifactId>
+            <version>2.2.10</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -58,5 +66,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>
