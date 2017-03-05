@@ -1,4 +1,4 @@
-package ru.bin.bank.info;
+package org.iegs.info.books;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,8 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Launcher {
 
 	public static void main(String[] args) {
-		System.getProperties().put("server.port", 9495);
 		SpringApplication.run(Launcher.class, args);
 	}
-
 }
