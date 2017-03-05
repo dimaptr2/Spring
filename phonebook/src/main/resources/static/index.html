@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/pbook.css">
+    <script src="jquery/jquery.js"></script>
+    <script src="jquery/jquery-ui.js"></script>
+    <title>Phone book</title>
+    <script>
+        // Set the styles in the elements
+        $(document).ready( function() {
+            $("#left-panel").addClass("left-panel");
+            $("label").addClass("blue-label");
+            $("#first-name").addClass("main-input");
+            $("#last-name").addClass("main-input");
+            $("#middle-name").addClass("main-input");
+            $("#phone").addClass("main-input");
+            $("#extension").addClass("main-input");
+            $("#email").addClass("main-input");
+            $("#btn-create").addClass("main-button");
+            $("#btn-change").addClass("main-button");
+            $("#btn-read").addClass("main-button");
+            $("#btn-delete").addClass("main-button");
+            $("#output-area").addClass("central-panel");
+
+        });
+    </script>
+</head>
+<body>
+<div id="top-header">
+    <header>
+        <h1>Телефонная книга</h1>
+    </header>
+</div>
+<nav id="left-panel">
+    <!--<form id="main-form">-->
+        <label>Имя: </label>
+        <br>
+        <input id="first-name" name="first-name" type="text">
+        <br>
+        <label>Фамилия: </label>
+        <br>
+        <input id="last-name" name="last-name" type="text">
+        <br>
+        <label>Отчество: </label>
+        <br>
+        <input id="middle-name" name="middle-name" type="text">
+        <br>
+        <label>Телефон: </label>
+        <br>
+        <input id="phone" name="phone" type="tel">
+        <br>
+        <label>Доб. номер: </label>
+        <br>
+        <input id="extension" name="extension" type="text">
+        <br>
+        <label>E-mail: </label>
+        <br>
+        <input id="email" name="email" type="text">
+        <br>
+        <button id="btn-create" name="btn-create"
+                value="CREATE"
+                type="button">
+            Создать
+        </button>
+        <br>
+        <button id="btn-change" name="btn-change"
+            value="CHANGE"
+            type="button">
+            Изменить
+        </button>
+        <br>
+        <button id="btn-read" name="btn-read"
+            value="READ"
+            type="button">
+            Просмотреть
+        </button>
+        <br>
+        <button id="btn-delete" name="btn-delete"
+            value="DELETE"
+            type="button">
+            Удалить
+        </button>
+    <!--</form>-->
+</nav>
+<div id="output-area">
+
+</div>
+</body>
+</html>
