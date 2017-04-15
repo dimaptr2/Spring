@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        flatDir {
+            dirs 'saplib'
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
+    }
+}
+
+group 'ru.velkomfood.mysap.info'
+version '1.1'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+//mainClassName = group + '.Launcher'
+
+jar {
+    baseName = 'saploader'
+    version = version
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'saplib'
+    }
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter")
+    compile fileTree(dir: 'saplib', include: '*.jar')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+//task copyCLibs(type: Copy) {
+//    from 'lib/'
+//    into archivesBaseName + 'BOOT-INF/lib'
+//    include '**/*.so'
+//} with jar
