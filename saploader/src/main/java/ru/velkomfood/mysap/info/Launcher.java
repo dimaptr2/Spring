@@ -1,5 +1,6 @@
 package ru.velkomfood.mysap.info;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -13,7 +14,7 @@ public class Launcher {
     public static void main(String[] args) {
 
         System.out.println("Start SAP reader server on the port 9192");
-        System.out.println("Start task for the uploading data from SAP");
+        SpringApplication.run(Launcher.class, args);
 
     }
 

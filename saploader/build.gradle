@@ -36,12 +36,24 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("mysql:mysql-connector-java")
     compile fileTree(dir: 'saplib', include: '*.jar')
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-//task copyCLibs(type: Copy) {
-//    from 'lib/'
-//    into archivesBaseName + 'BOOT-INF/lib'
-//    include '**/*.so'
-//} with jar
+// My special tasks
+task copyMyJar(type: Copy) {
+    from 'build/libs/' + 'saploader-' + version + '.jar'
+    into 'dist'
+}
+
+task copyCLibs(type: Copy) {
+    from 'saplib/libsapjco3.so'
+    into 'dist'
+}
+
+task refreshPro(type: Delete) {
+    delete 'build'
+    delete 'dist'
+}
