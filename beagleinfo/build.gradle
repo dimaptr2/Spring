@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
+    }
+}
+
+group 'ru.velkomfood.beagle.info'
+version '3.1'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+jar {
+    baseName = 'beagleinfo'
+    version =  version
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
+}
+
+// Exclude Tomcat using
+configurations {
+    compile.exclude module: "spring-boot-starter-tomcat"
+}
+
+// Project dependencies
+dependencies {
+    // Servler container (NIO Undertow)
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-undertow")
+    // Spring JDBC API
+    compile("org.springframework:spring-jdbc")
+    // MySQL JDBC driver
+    compile("mysql:mysql-connector-java")
+    // JUnit
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+// Build a distribution
+task createDist(type: Copy) {
+    from fileTree(dir: 'build/libs', include: '*.jar')
+    into 'dist'
+}
+
+// Destroy a distribution
+task cleanDist(type: Delete) {
+    delete 'dist'
+}
