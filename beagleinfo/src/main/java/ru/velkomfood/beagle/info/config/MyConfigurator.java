@@ -17,11 +17,11 @@ public class MyConfigurator {
     @Bean
     public DataSource dataSource() {
         MysqlDataSource ds = new MysqlDataSource();
-        ds.setServerName("srv-sapapp.eatmeat.ru");
+        ds.setServerName("");
         ds.setPort(3306);
-        ds.setDatabaseName("beagle");
-        ds.setUser("beagle");
-        ds.setPassword("1qaz@WSX");
+        ds.setDatabaseName("");
+        ds.setUser("");
+        ds.setPassword("");
         return ds;
     }
 
