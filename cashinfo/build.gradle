@@ -1,0 +1,95 @@
+buildscript {
+
+    ext {
+        springBootVersion = '1.5.2.RELEASE'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+
+}
+
+
+group 'ru.velkomfood.fin.cash.server'
+version '1.0.1'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+
+    mavenCentral()
+    maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
+
+}
+
+configurations {
+    compile.exclude module: "spring-boot-starter-tomcat"
+}
+
+
+dependencies {
+
+    // SAP Java connector dependencies
+    compile fileTree(dir: '/usr/sap/JCo', include: 'sapjco3.jar')
+
+    // Spring framework
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile('org.springframework.boot:spring-boot-starter-undertow')
+    compile("com.h2database:h2")
+    // JPA dependencies
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    // Unit testing
+    testCompile("junit:junit")
+
+}
+
+// Build the main jar file
+jar {
+
+    baseName = 'cashinfo'
+    version = version
+
+    def localDeps = '/usr/sap/JCo/sapjco3.jar'
+    // Add local dependencies to the manifest
+    manifest {
+        attributes(
+                'Class-Path': localDeps
+        )
+    }
+
+}
+
+// Additional tasks
+//task copyDeps(type: Copy) {
+//
+//    from fileTree(dir: '/usr/sap/JCo', includes: ['*.jar', '*.so', '*.mf'])
+//    into 'build/libs'
+//
+//}
+
+// Create the productive release
+task createDistr(type: Copy) {
+
+    from fileTree(dir: 'build/libs', include: '*.jar')
+    into 'dist'
+
+}
+
+// Remove the catalog with the productive release
+task removeDistr(type: Delete) {
+
+    delete 'dist'
+
+}
+
+
