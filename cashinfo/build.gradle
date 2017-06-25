@@ -70,12 +70,6 @@ jar {
 }
 
 // Additional tasks
-//task copyDeps(type: Copy) {
-//
-//    from fileTree(dir: '/usr/sap/JCo', includes: ['*.jar', '*.so', '*.mf'])
-//    into 'build/libs'
-//
-//}
 
 // Create the productive release
 task createDistr(type: Copy) {
