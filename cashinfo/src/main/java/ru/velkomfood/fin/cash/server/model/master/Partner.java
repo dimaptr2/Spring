@@ -25,9 +25,9 @@ public class Partner implements Serializable {
     @Column(length = 15)
     private String postcode;
 
-    @Column(length = 128)
+    @Column(length = 50)
     private String city;
-    @Column(length = 128)
+    @Column(length = 50)
     private String street;
 
     public Partner() { }

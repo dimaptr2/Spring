@@ -10,6 +10,7 @@ import java.util.List;
  */
 public interface IMaterialRepository extends CrudRepository<Material, Long> {
 
+
     List<Material> findAll();
     Material findMaterialById(long id);
     List<Material> findMaterialByDescriptionLike(String mat);

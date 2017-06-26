@@ -4,6 +4,7 @@ import com.sap.conn.jco.*;
 import com.sap.conn.jco.ext.DestinationDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.velkomfood.fin.cash.server.model.master.Company;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
 
@@ -32,12 +33,12 @@ public class SAPEngine {
 
     public SAPEngine() {
         connProperties = new Properties();
-        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "XXXXXX");
-        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "XX");
-        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "XXX");
-        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "XXX");
-        connProperties.setProperty(DestinationDataProvider.JCO_USER, "XXXXXX");
-        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "XXXXXX");
+        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_USER, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "");
         connProperties.setProperty(DestinationDataProvider.JCO_LANG, "RU");
         createDestinationDataFile(DEST, connProperties);
     }
@@ -66,16 +67,81 @@ public class SAPEngine {
 
     }
 
+    // Get all information about company code
+    public Company readCompanyData() throws JCoException {
+
+        Company company = new Company();
+        company.setId("1000");
+
+        JCoFunction bapiCompanyDetail = destination
+                .getRepository()
+                .getFunction("BAPI_COMPANYCODE_GETDETAIL");
+
+        if (bapiCompanyDetail == null) {
+            throw new RuntimeException("Function BAPI_COMPANYCODE_GETDETAIL not found");
+        }
+
+        bapiCompanyDetail
+                .getImportParameterList()
+                .setValue("COMPANYCODEID", company.getId());
+
+        bapiCompanyDetail.execute(destination);
+
+        JCoStructure companyData = bapiCompanyDetail
+                .getExportParameterList()
+                .getStructure("COMPANYCODE_ADDRESS");
+
+        for (JCoField f: companyData) {
+            switch (f.getName()) {
+                case "NAME":
+                    company.setName1(f.getString());
+                    break;
+                case "NAME_2":
+                    company.setName2(f.getString());
+                    break;
+                case "COUNTRY":
+                    company.setCountry(f.getString());
+                    break;
+                case "POSTL_COD1":
+                    company.setPostcode(f.getString());
+                    break;
+                case "CITY":
+                    company.setCity(f.getString());
+                    break;
+                case "STREET":
+                    company.setStreet(f.getString());
+                    break;
+                case "HOUSE_NO":
+                    company.setBuilding(f.getString());
+                    break;
+                case "TEL1_NUMBR":
+                    company.setPhone(f.getString());
+                    break;
+                case "FAX_NUMBER":
+                    company.setFax(f.getString());
+                    break;
+            }
+        }
+
+        return company;
+    }
+
     public int readAllMaterialsFromSAP() throws JCoException, SQLException {
 
         int counter = 0;
 
-        JCoFunction bapiMatList = destination.getRepository().getFunction("BAPI_MATERIAL_GETLIST");
+        JCoFunction bapiMatList = destination
+                .getRepository()
+                .getFunction("BAPI_MATERIAL_GETLIST");
+
         if (bapiMatList == null) {
             throw new RuntimeException("Function BAPI_MATERIAL_GETLIST not found");
         }
 
-        JCoFunction bapiMatDetails = destination.getRepository().getFunction("BAPI_MATERIAL_GET_DETAIL");
+        JCoFunction bapiMatDetails = destination
+                .getRepository()
+                .getFunction("BAPI_MATERIAL_GET_DETAIL");
+
         if (bapiMatDetails == null) {
             throw new RuntimeException("Function BAPI_MATERIAL_GET_DETAIL not found");
         }

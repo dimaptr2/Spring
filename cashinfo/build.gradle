@@ -1,7 +1,7 @@
 buildscript {
 
     ext {
-        springBootVersion = '1.5.2.RELEASE'
+        springBootVersion = '1.5.4.RELEASE'
     }
 
     repositories {
@@ -32,9 +32,9 @@ repositories {
 
 }
 
-configurations {
-    compile.exclude module: "spring-boot-starter-tomcat"
-}
+//configurations {
+//    compile.exclude module: "spring-boot-starter-tomcat"
+//}
 
 
 dependencies {
@@ -44,10 +44,11 @@ dependencies {
 
     // Spring framework
     compile("org.springframework.boot:spring-boot-starter-web")
-    compile('org.springframework.boot:spring-boot-starter-undertow')
-    compile("com.h2database:h2")
+//    compile('org.springframework.boot:spring-boot-starter-undertow')
+//    compile("com.h2database:h2")
     // JPA dependencies
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("mysql:mysql-connector-java")
     // Unit testing
     testCompile("junit:junit")
 

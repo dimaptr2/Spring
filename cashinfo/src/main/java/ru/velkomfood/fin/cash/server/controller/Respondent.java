@@ -1,5 +1,7 @@
 package ru.velkomfood.fin.cash.server.controller;
 
+import com.fasterxml.jackson.core.json.UTF8DataInputJsonParser;
+import org.apache.tomcat.util.buf.Utf8Decoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -8,6 +10,9 @@ import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
 import ru.velkomfood.fin.cash.server.persistence.DBEngine;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -51,12 +56,14 @@ public class Respondent {
         return material;
     }
 
-    @RequestMapping("/likematerial")
+    @RequestMapping(value = "/likematerial")
     public List<Material> readMaterialLikeIt(@RequestParam(value = "mat", defaultValue = "") String mat) {
 
         List<Material> materials = null;
+        mat += "%";
 
         try {
+//            mat = URLDecoder.decode(mat, "UTF-8");
             materials = dbEngine.readMaterialByDescLike(mat);
         } catch (SQLException ex) {
             ex.printStackTrace();
