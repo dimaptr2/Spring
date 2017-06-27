@@ -13,7 +13,7 @@ public interface ICashDocumentRepository extends CrudRepository<CashDocument, Lo
 
     CashDocument findCashDocumentById(long id);
 
-    List<CashDocument> findCashDocumentByPostingDate(java.sql.Date postingDate);
+    List<CashDocument> findCashDocumentByPostingDate(java.sql.Date atDate);
 
     List<CashDocument> findCashDocumentByIdBetween(long low, long high);
 

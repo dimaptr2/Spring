@@ -20,15 +20,23 @@ public class Material implements Serializable {
     private String description;
     @Column(length = 3)
     private String uom;
+
+    @Column(name = "price_unit", precision = 20, scale = 3)
+    private BigDecimal priceUnit;
+
     @Column(precision = 20, scale = 2)
     private BigDecimal cost;
 
     public Material() { }
 
-    public Material(long id, String description, String uom, BigDecimal cost) {
+    public Material(long id, String description,
+                    String uom,
+                    BigDecimal priceUnit,
+                    BigDecimal cost) {
         this.id = id;
         this.description = description;
         this.uom = uom;
+        this.priceUnit = priceUnit;
         this.cost = cost;
     }
 
@@ -54,6 +62,14 @@ public class Material implements Serializable {
 
     public void setUom(String uom) {
         this.uom = uom;
+    }
+
+    public BigDecimal getPriceUnit() {
+        return priceUnit;
+    }
+
+    public void setPriceUnit(BigDecimal priceUnit) {
+        this.priceUnit = priceUnit;
     }
 
     public BigDecimal getCost() {
@@ -85,6 +101,7 @@ public class Material implements Serializable {
                 "id=" + id +
                 ", description='" + description + '\'' +
                 ", uom='" + uom + '\'' +
+                ", priceUnit=" + priceUnit +
                 ", cost=" + cost +
                 '}';
     }

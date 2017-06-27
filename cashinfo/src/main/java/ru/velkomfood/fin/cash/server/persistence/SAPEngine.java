@@ -7,13 +7,14 @@ import org.springframework.stereotype.Component;
 import ru.velkomfood.fin.cash.server.model.master.Company;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
+import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -22,7 +23,7 @@ import java.util.*;
 @Component
 public class SAPEngine {
 
-    final static String DEST = "PRD500";
+    final static String DEST = "XXX";
     final static String SUFFIX = ".jcoDestination";
 
     private Properties connProperties;
@@ -128,6 +129,8 @@ public class SAPEngine {
 
     public int readAllMaterialsFromSAP() throws JCoException, SQLException {
 
+        final BigDecimal ZERO = new BigDecimal(0.000);
+
         int counter = 0;
 
         JCoFunction bapiMatList = destination
@@ -214,12 +217,17 @@ public class SAPEngine {
                             case "MOVING_PR":
                                 prices.put(f.getName(), f.getBigDecimal());
                                 break;
+                            case "PRICE_UNIT":
+                                m.setPriceUnit(f.getBigDecimal());
                         }
                     }
                     if (!prices.isEmpty()) {
                         BigDecimal value = prices.get("STD_PRICE");
-                        if (value.equals(new BigDecimal(0.000))) {
+                        if (value.equals(ZERO)) {
                             value = prices.get("MOVING_PR");
+                        }
+                        if (!m.getPriceUnit().equals(ZERO)) {
+                            value = value.divide(m.getPriceUnit());
                         }
                         m.setCost(value);
                     }
@@ -361,6 +369,90 @@ public class SAPEngine {
         }
 
         return counter;
+    }
+
+    // Read cash documents and deliveries
+    public void readCashDocumentsByDate(java.sql.Date fromDate, java.sql.Date toDate) throws JCoException {
+
+        String sapDateFrom, sapDateTo;
+
+        if (fromDate.equals(toDate)) {
+            sapDateFrom = convertDateToSAPFormat(fromDate);
+            sapDateTo = sapDateFrom;
+        } else {
+            sapDateFrom = convertDateToSAPFormat(fromDate);
+            sapDateTo = convertDateToSAPFormat(toDate);
+        }
+
+        JCoFunction rfcCashDoc = destination.getRepository().getFunction("Z_RFC_GET_CASHDOC");
+        if (rfcCashDoc == null) {
+            throw new RuntimeException("Function Z_RFC_GET_CASHDOC not found");
+        }
+
+        rfcCashDoc.getImportParameterList().setValue("I_COMP_CODE", "1000");
+        rfcCashDoc.getImportParameterList().setValue("I_CAJO_NUMBER", "1000");
+        rfcCashDoc.getImportParameterList().setValue("FROM_DATE", sapDateFrom);
+        rfcCashDoc.getImportParameterList().setValue("TO_DATE", sapDateTo);
+
+        try {
+
+            JCoContext.begin(destination);
+
+            rfcCashDoc.execute(destination);
+            JCoTable docs = rfcCashDoc.getTableParameterList().getTable("T_CJ_DOCS");
+
+            if (docs.getNumRows() > 0) {
+
+                do {
+
+                    String txtPosition = docs.getString("POSITION_TEXT");
+
+                    if (txtPosition.charAt(0) == '8' ||
+                            (txtPosition.charAt(0) == '0' && txtPosition.charAt(1) == '8')) {
+
+                        String[] posTxt = txtPosition.split(" ");
+
+                        long delivery = Long.parseLong(posTxt[0]);
+                        CashDocument cd = new CashDocument();
+                        cd.setId(docs.getLong("POSTING_NUMBER"));
+                        cd.setCajoNumber(docs.getString("CAJO_NUMBER"));
+                        cd.setCompanyId(docs.getString("COMP_CODE"));
+                        cd.setYear(docs.getInt("FISC_YEAR"));
+                        cd.setPostingDate(java.sql.Date.valueOf(docs.getString("POSTING_DATE")));
+                        cd.setPositionText(txtPosition);
+                        cd.setDeliveryId(delivery);
+                        cd.setAmount(docs.getBigDecimal("H_NET_AMOUNT"));
+                        dbEngine.saveCashDocument(cd);
+                    }
+
+                } while (docs.nextRow());
+
+            } // number rows
+
+        } finally {
+
+            JCoContext.end(destination);
+
+        }
+
+    } // cash documents, deliveries
+
+    // Additional methods
+
+    // Build an internal date format for SAP systems
+    // You should send a date into ISO form "yyyy-MM-dd"
+    private String convertDateToSAPFormat(java.sql.Date value) {
+
+
+        String[] temp = value.toLocalDate().toString().split("-");
+
+        String txtValue = temp[0] + temp[1] + temp[2]; // yyyyMMdd
+
+        if (temp.length  != 3) {
+            return "Error";
+        } else {
+            return txtValue;
+        }
     }
 
 }

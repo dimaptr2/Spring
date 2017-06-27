@@ -58,7 +58,7 @@ public class DBEngine {
 
     }
 
-    private boolean checkTableIsEmpty(String tableName) throws SQLException {
+    public boolean checkTableIsEmpty(String tableName) throws SQLException {
 
         boolean nothing;
         long counter = 0;
@@ -91,14 +91,14 @@ public class DBEngine {
         return nothing;
     }
 
-    private void initUsersTable() throws SQLException {
+    private void initUsersTable() {
 
         User user = new User("admin", "Administrator", "Administrator", "dubina");
         iUserRepository.save(user);
 
     }
 
-    private void initCompanyIdsTable() throws JCoException, SQLException {
+    private void initCompanyIdsTable() throws JCoException {
 
         Company comId = iCompanyRepository.findCompanyById("1000");
 
@@ -109,7 +109,7 @@ public class DBEngine {
 
     }
 
-    private void initPartnerTypesTable() throws SQLException {
+    private void initPartnerTypesTable() {
 
         List<PartnerType> pTypes = iPartnerTypeRepository.findAll();
 
@@ -131,7 +131,7 @@ public class DBEngine {
 
     }
 
-    private void initDeliveryTypes() throws SQLException {
+    private void initDeliveryTypes() {
 
         List<DeliveryType> dt = iDeliveryTypeRepository.findAll();
 
@@ -159,7 +159,7 @@ public class DBEngine {
 
     }
 
-    public void savePartner(Partner par) throws SQLException {
+    public void savePartner(Partner par) {
 
         Partner partner = iPartnerRepository.findPartnerById(par.getId());
 
@@ -169,48 +169,84 @@ public class DBEngine {
 
     }
 
-    public List<Material> readMaterialDictionary() throws SQLException {
+    // Data reading
+
+    // General information about our company
+
+    public Company readSingleCompany(String companiId) {
+        return iCompanyRepository.findCompanyById(companiId);
+    }
+
+    public List<Company> readArrayCompanies() {
+        return iCompanyRepository.findAll();
+    }
+
+    // materials
+
+    public List<Material> readMaterialDictionary() {
         return iMaterialRepository.findAll();
     }
 
-    public Material readMaterialByKey(long key) throws SQLException {
+    public Material readMaterialByKey(long key) {
         return iMaterialRepository.findMaterialById(key);
     }
 
-    public List<Material> readMaterialsBetween(long low, long high) throws SQLException {
+    public List<Material> readMaterialsBetween(long low, long high) {
         return iMaterialRepository.findMaterialByIdBetween(low, high);
     }
 
-    public List<Material> readMaterialByDescLike(String description) throws SQLException {
+    public List<Material> readMaterialByDescLike(String description) {
+        description += "%";
         return iMaterialRepository.findMaterialByDescriptionLike(description);
     }
 
-    public List<Partner> readPartnerDictionary() throws SQLException {
+    // partners
+
+    public List<Partner> readPartnerDictionary() {
         return iPartnerRepository.findAll();
     }
 
-    public Partner readPartnerByKey(String key) throws SQLException {
+    public Partner readPartnerByKey(String key) {
         return iPartnerRepository.findPartnerById(key);
+    }
+
+    public List<Partner> readPartnersBetween(String low, String high) {
+        return iPartnerRepository.findPartnerByIdBetween(low, high);
+    }
+
+    public List<Partner> readPartnerByNameLikeIt(String name) {
+        name += "%";
+        return iPartnerRepository.findPartnerByNameLike(name);
     }
 
     // Transaction data processing
 
     // Cash Documents
-    public void saveCashDocument(CashDocument doc) throws SQLException {
+
+    public void saveCashDocument(CashDocument doc) {
         iCashDocumentRepository.save(doc);
     }
 
-    public List<CashDocument> readAllCashDocuments() throws SQLException {
+    public List<CashDocument> readAllCashDocuments() {
         return iCashDocumentRepository.findAll();
     }
 
-    public List<CashDocument> readCashDocumentsByDate(java.sql.Date postingDate) throws SQLException {
+    public CashDocument readCashDocumentByKey(long id) {
+        return iCashDocumentRepository.findCashDocumentById(id);
+    }
+
+    public List<CashDocument> readCashDocumentsByDate(java.sql.Date postingDate) {
         return iCashDocumentRepository.findCashDocumentByPostingDate(postingDate);
     }
 
-    public List<CashDocument> readCashDocumentsByIdBetween(long low, long high) throws SQLException {
+    public List<CashDocument> readCashDocumentsByIdBetween(long low, long high) {
         return iCashDocumentRepository.findCashDocumentByIdBetween(low, high);
     }
+
+    public List<CashDocument> readCashDocumentsByDateBetween(java.sql.Date fromDate, java.sql.Date toDate) {
+        return iCashDocumentRepository.findCashDocumentByPostingDateBetween(fromDate, toDate);
+    }
+
     // Outgoing deliveries
 
     // Sales orders

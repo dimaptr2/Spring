@@ -1,18 +1,15 @@
 package ru.velkomfood.fin.cash.server.controller;
 
-import com.fasterxml.jackson.core.json.UTF8DataInputJsonParser;
-import org.apache.tomcat.util.buf.Utf8Decoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
+import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
 import ru.velkomfood.fin.cash.server.persistence.DBEngine;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -25,18 +22,11 @@ public class Respondent {
     @Autowired
     private DBEngine dbEngine;
 
+    // Requests for materials
+
     @RequestMapping("/materials")
     public List<Material> readMaterials() {
-
-        List<Material> materials = null;
-
-        try {
-            materials = dbEngine.readMaterialDictionary();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return materials;
+        return dbEngine.readMaterialDictionary();
     }
 
     @RequestMapping("/material")
@@ -44,82 +34,84 @@ public class Respondent {
 
         long id = Long.parseLong(matId);
 
-        Material material = null;
-
-        try {
-            material = dbEngine.readMaterialByKey(id);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-
-        return material;
+        return dbEngine.readMaterialByKey(id);
     }
 
-    @RequestMapping(value = "/likematerial")
-    public List<Material> readMaterialLikeIt(@RequestParam(value = "mat", defaultValue = "") String mat) {
-
-        List<Material> materials = null;
-        mat += "%";
-
-        try {
-//            mat = URLDecoder.decode(mat, "UTF-8");
-            materials = dbEngine.readMaterialByDescLike(mat);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return materials;
-    }
 
     @RequestMapping("/matbetween")
     public List<Material> readMaterialsBetween(
             @RequestParam(value = "low", defaultValue = "") String low,
             @RequestParam(value = "high", defaultValue = "") String high) {
 
-
         long vLow = Long.parseLong(low);
         long vHigh = Long.parseLong(high);
 
-        List<Material> materials = null;
-
-        try {
-            materials = dbEngine.readMaterialsBetween(vLow, vHigh);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return materials;
+        return dbEngine.readMaterialsBetween(vLow, vHigh);
     }
+
+    @RequestMapping(value = "/likematerial")
+    public List<Material> readMaterialLikeIt(@RequestParam(value = "mat", defaultValue = "") String mat) {
+        return dbEngine.readMaterialByDescLike(mat);
+    }
+
+    // Requests for partners
 
     @RequestMapping("/partners")
     public List<Partner> readPartners() {
-
-        List<Partner> partners = null;
-
-        try {
-            partners = dbEngine.readPartnerDictionary();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return partners;
+        return dbEngine.readPartnerDictionary();
     }
 
     @RequestMapping("/partner")
     public Partner readPartner(@RequestParam(value = "parId", defaultValue = "") String parId) {
-
-        Partner partner = null;
-
-        try {
-            partner = dbEngine.readPartnerByKey(parId);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return partner;
+        return dbEngine.readPartnerByKey(parId);
     }
 
+    @RequestMapping("/parbetween")
+    public List<Partner> readPartnersBetween(
+            @RequestParam(value = "low", defaultValue = "") String low,
+            @RequestParam(value = "high", defaultValue = "") String high
+    ) {
+        return dbEngine.readPartnersBetween(low, high);
+    }
 
+    @RequestMapping("/likepartner")
+    public List<Partner> readPartnerLikeIt(@RequestParam(value = "name", defaultValue = "") String name) {
+        return dbEngine.readPartnerByNameLikeIt(name);
+    }
+
+    // Requests for cash documents
+
+    @RequestMapping("/dockey")
+    public CashDocument readCashDocumentByNumber(@RequestParam(value = "idValue", defaultValue = "") String idValue) {
+
+        long id = Long.parseLong(idValue);
+
+        return dbEngine.readCashDocumentByKey(id);
+    }
+
+    @RequestMapping("/cashdoc")
+    public List<CashDocument> readCashDocumentsByDate(
+            @RequestParam(value = "atValue", defaultValue = "") String atValue) {
+
+        java.sql.Date atDate = Date.valueOf(atValue);
+
+        return dbEngine.readCashDocumentsByDate(atDate);
+    }
+
+    @RequestMapping("/datebetween")
+    public List<CashDocument> readCashDocumentsByDateRange(
+            @RequestParam(value = "fromValue", defaultValue = "") String fromValue,
+            @RequestParam(value = "toValue", defaultValue = "") String toValue
+    ) {
+
+        java.sql.Date fromDate = Date.valueOf(fromValue);
+        java.sql.Date toDate = Date.valueOf(toValue);
+
+        return dbEngine.readCashDocumentsByDateBetween(fromDate, toDate);
+    }
+
+    // Outgoing deliveries
+
+    // Sales orders
 
 }

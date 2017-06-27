@@ -4,13 +4,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 /**
  * Created by dpetrov on 26.06.17.
  */
 @Entity
 @Table(name = "delivery_type")
-public class DeliveryType {
+public class DeliveryType implements Serializable {
+
+    // 1 - inbound delivery
+    // 2 - outbound delivery
 
     @Id
     private int id;
