@@ -10,6 +10,6 @@ import java.util.List;
 public interface IDeliveryItemRepository extends CrudRepository<DeliveryItem, DeliveryItemId> {
 
     List<DeliveryItem> findAll();
-    List<DeliveryItem> findDeliveryItemById(DeliveryItemId itemId);
+    DeliveryItem findDeliveryItemById(DeliveryItemId itemId);
 
 }

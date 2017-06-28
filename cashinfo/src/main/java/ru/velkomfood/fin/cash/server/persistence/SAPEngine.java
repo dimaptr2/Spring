@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SAPEngine {
 
-    final static String DEST = "PRD500";
+    final static String DEST = "CCCC";
     final static String SUFFIX = ".jcoDestination";
 
     private Properties connProperties;
@@ -461,6 +461,7 @@ public class SAPEngine {
         }
     }
 
+    // Delivery processing
     private void readDeliveryInfoByKey(long deliveryId, String companyCode) throws JCoException {
 
         JCoFunction bapiDeList = destination.getRepository().getFunction("BAPI_DELIVERY_GETLIST");
@@ -511,6 +512,7 @@ public class SAPEngine {
                 dit.setId(items.getLong("VBELN"));
                 dit.setPosition(items.getLong("POSNR"));
                 dit.setMaterialId(items.getLong("MATNR"));
+                dit.setDescription(items.getString("ARKTX"));
                 dit.setQuantity(items.getBigDecimal("LFIMG"));
                 BigDecimal[] sd = salesInfo.get(dit.getMaterialId());
                 if (sd.length == 2) {
@@ -523,11 +525,58 @@ public class SAPEngine {
 
     } // read a delivery by key
 
-    private Map<Long, BigDecimal[]> readSalesOrderByDelivery(long key) {
+    // Read a document flow
+    private Map<Long, BigDecimal[]> readSalesOrderByDelivery(long key) throws JCoException {
 
         // BigDecimal array with the length equals 2
         Map<Long, BigDecimal[]> prices = new ConcurrentHashMap<>();
 
+        // Function that can take the sales order number
+        JCoFunction rfcKey = destination.getRepository().getFunction("Z_RFC_GET_SDORD_BY_DELIVERY");
+        if (rfcKey == null) {
+            throw new RuntimeException("Function Z_RFC_GET_SDORD_BY_DELIVERY not found");
+        }
+
+        JCoTable tKeys = rfcKey.getTableParameterList().getTable("T_KEYS");
+        tKeys.appendRow();
+        tKeys.setValue("VBELN", alphaTransform(key));
+
+        rfcKey.execute(destination);
+
+        JCoTable vbKeys = rfcKey.getTableParameterList().getTable("T_VBAK_KEYS");
+        if (vbKeys.getNumRows() > 0) {
+
+            long vbeln;
+
+            do {
+                vbeln = vbKeys.getLong("VBELN");
+            } while (vbKeys.nextRow());
+
+            // Function that can take sales orders by keys
+            JCoFunction rfcSales = destination.getRepository().getFunction("Z_RFC_GET_SD_ORDERS_BY_KEY");
+            if (rfcSales == null) {
+                throw new RuntimeException("Function Z_RFC_GET_SD_ORDERS_BY_KEY not found");
+            }
+
+            JCoTable sKeys = rfcSales.getTableParameterList().getTable("T_KEYS");
+            sKeys.appendRow();
+            sKeys.setValue("VBELN", alphaTransform(vbeln));
+
+            rfcSales.execute(destination);
+
+            JCoTable vbap = rfcSales.getTableParameterList().getTable("T_VBAP");
+            if (vbap.getNumRows() > 0) {
+                do {
+                    long material = vbap.getLong("MATNR");
+                    if (!prices.containsKey(material)) {
+                        BigDecimal[] values = new BigDecimal[2];
+                        values[0] = vbap.getBigDecimal("NETPR"); // unit price
+                        values[1] = vbap.getBigDecimal("KZWI5"); // unit rate of VAT
+                        prices.put(material, values);
+                    }
+                } while (vbap.nextRow());
+            }
+        }
 
         return prices;
     }

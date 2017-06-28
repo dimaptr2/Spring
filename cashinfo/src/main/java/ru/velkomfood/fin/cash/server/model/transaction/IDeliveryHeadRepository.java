@@ -13,6 +13,6 @@ public interface IDeliveryHeadRepository extends CrudRepository<DeliveryHead, Lo
     List<DeliveryHead> findAll();
     DeliveryHead findDeliveryHeadById(long id);
     List<DeliveryHead> findDeliveryHeadByIdBetween(long low, long high);
-    List<DeliveryHead> findDeliveryHeadByPostingDateBetween(LocalDate from, LocalDate to);
+    List<DeliveryHead> findDeliveryHeadByPostingDateBetween(java.sql.Date from, java.sql.Date to);
 
 }

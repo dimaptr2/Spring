@@ -8,9 +8,11 @@ import ru.velkomfood.fin.cash.server.model.transaction.*;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -252,15 +254,72 @@ public class DBEngine {
 
     // Outgoing deliveries
 
+    public DeliveryHead readDeliveryHeadByKey(long id) {
+        return iDeliveryHeadRepository.findDeliveryHeadById(id);
+    }
+
     // Headers
     public void saveDeliveryHead(DeliveryHead deliveryHead) {
-        iDeliveryHeadRepository.save(deliveryHead);
+
+        DeliveryHead dh = readDeliveryHeadByKey(deliveryHead.getId());
+
+        if (dh == null) {
+            iDeliveryHeadRepository.save(deliveryHead);
+        }
+
     }
 
     // Items
 
+    public List<DeliveryItem> readDeliveryItemsByKey(long key) throws SQLException {
+
+        List<DeliveryItem> dits = new ArrayList<>();
+
+        StringBuilder sb = new StringBuilder(0)
+                .append("SELECT id, position, material_id, ")
+                .append("price, quantity, vat ")
+                .append("FROM delivery_item ")
+                .append("WHERE id = ? ")
+                .append("ORDER BY id, position");
+
+        DeliveryHead dh = iDeliveryHeadRepository.findDeliveryHeadById(key);
+
+        if (dh != null) {
+
+            PreparedStatement pstmt = null;
+
+            try {
+                pstmt = dataSource.getConnection().prepareStatement(sb.toString());
+                pstmt.setLong(1, key);
+                ResultSet rs = pstmt.executeQuery(sb.toString());
+                while (rs.next()) {
+                    DeliveryItem di = new DeliveryItem();
+                    di.setId(rs.getLong("id"));
+                    di.setPosition(rs.getLong("position"));
+                    di.setMaterialId(rs.getLong("material_id"));
+                    di.setPrice(rs.getBigDecimal("price"));
+                    di.setQuantity(rs.getBigDecimal("quantity"));
+                    di.setVat(rs.getBigDecimal("vat"));
+                    dits.add(di);
+                }
+                rs.close();
+            } finally {
+                pstmt.close();
+            }
+
+        } // delivery head
+
+        return dits;
+    }
+
     public void saveDeliveryItem(DeliveryItem deliveryItem) {
-        iDeliveryItemRepository.save(deliveryItem);
+
+        DeliveryHead dh = iDeliveryHeadRepository.findDeliveryHeadById(deliveryItem.getId());
+
+        if (dh == null) {
+            iDeliveryItemRepository.save(deliveryItem);
+        }
+
     }
     // Sales orders
 }

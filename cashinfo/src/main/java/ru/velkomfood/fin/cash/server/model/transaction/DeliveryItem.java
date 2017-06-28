@@ -20,6 +20,9 @@ public class DeliveryItem implements Serializable {
     @Column(name = "material_id", nullable = false)
     private long materialId;
 
+    @Column(length = 50)
+    private String description;
+
     @Column(precision = 20, scale = 3)
     private BigDecimal quantity;
 
@@ -32,11 +35,12 @@ public class DeliveryItem implements Serializable {
     public DeliveryItem() { }
 
     public DeliveryItem(long id, long position,
-                        long materialId, BigDecimal quantity,
-                        BigDecimal price, BigDecimal vat) {
+                        long materialId, String description,
+                        BigDecimal quantity, BigDecimal price, BigDecimal vat) {
         this.id = id;
         this.position = position;
         this.materialId = materialId;
+        this.description = description;
         this.quantity = quantity;
         this.price = price;
         this.vat = vat;
@@ -64,6 +68,14 @@ public class DeliveryItem implements Serializable {
 
     public void setMaterialId(long materialId) {
         this.materialId = materialId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public BigDecimal getQuantity() {
@@ -114,6 +126,7 @@ public class DeliveryItem implements Serializable {
                 "id=" + id +
                 ", position=" + position +
                 ", materialId=" + materialId +
+                ", description='" + description + '\'' +
                 ", quantity=" + quantity +
                 ", price=" + price +
                 ", vat=" + vat +
