@@ -2,57 +2,92 @@ package ru.velkomfood.fin.cash.server.model.transaction;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
- * Created by dpetrov on 27.06.17.
+ * Created by dpetrov on 28.06.17.
  */
 @Entity
 @Table(name = "delivery_item")
+@IdClass(DeliveryItemId.class)
 public class DeliveryItem implements Serializable {
 
-    // composite primary key contains delivery_id and position number
-    @EmbeddedId
-    private ItemKey itemKey;
+    @Id
+    private long id;
+    @Id
+    private long position;
 
-    @Embeddable
-    class ItemKey {
+    @Column(name = "material_id", nullable = false)
+    private long materialId;
 
-        @Column(name = "delivery_id", nullable = false)
-        private long deliveryId;
-        @Column(nullable = false)
-        private long position;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal quantity;
 
-        public ItemKey(long deliveryId, long position) {
-            this.deliveryId = deliveryId;
-            this.position = position;
-        }
+    @Column(precision = 20, length = 2)
+    private BigDecimal price;
 
-        public long getDeliveryId() {
-            return deliveryId;
-        }
+    @Column(precision = 20, scale = 2)
+    private BigDecimal vat;
 
-        public void setDeliveryId(long deliveryId) {
-            this.deliveryId = deliveryId;
-        }
+    public DeliveryItem() { }
 
-        public long getPosition() {
-            return position;
-        }
-
-        public void setPosition(long position) {
-            this.position = position;
-        }
-
-    } // embedded class
-
-    // Delivery fields
-
-    public ItemKey getItemKey() {
-        return itemKey;
+    public DeliveryItem(long id, long position,
+                        long materialId, BigDecimal quantity,
+                        BigDecimal price, BigDecimal vat) {
+        this.id = id;
+        this.position = position;
+        this.materialId = materialId;
+        this.quantity = quantity;
+        this.price = price;
+        this.vat = vat;
     }
 
-    public void setItemKey(ItemKey itemKey) {
-        this.itemKey = itemKey;
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getPosition() {
+        return position;
+    }
+
+    public void setPosition(long position) {
+        this.position = position;
+    }
+
+    public long getMaterialId() {
+        return materialId;
+    }
+
+    public void setMaterialId(long materialId) {
+        this.materialId = materialId;
+    }
+
+    public BigDecimal getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public BigDecimal getVat() {
+        return vat;
+    }
+
+    public void setVat(BigDecimal vat) {
+        this.vat = vat;
     }
 
     @Override
@@ -62,12 +97,27 @@ public class DeliveryItem implements Serializable {
 
         DeliveryItem that = (DeliveryItem) o;
 
-        return itemKey != null ? itemKey.equals(that.itemKey) : that.itemKey == null;
+        if (id != that.id) return false;
+        return position == that.position;
     }
 
     @Override
     public int hashCode() {
-        return itemKey != null ? itemKey.hashCode() : 0;
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (int) (position ^ (position >>> 32));
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DeliveryItem{" +
+                "id=" + id +
+                ", position=" + position +
+                ", materialId=" + materialId +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                ", vat=" + vat +
+                '}';
     }
 
 }

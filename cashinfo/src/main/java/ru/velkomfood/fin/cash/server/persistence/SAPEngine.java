@@ -8,6 +8,9 @@ import ru.velkomfood.fin.cash.server.model.master.Company;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
 import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
+import ru.velkomfood.fin.cash.server.model.transaction.DeliveryHead;
+import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItem;
+import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItemId;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -15,7 +18,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by dpetrov on 22.06.17.
@@ -23,7 +28,7 @@ import java.util.*;
 @Component
 public class SAPEngine {
 
-    final static String DEST = "XXX";
+    final static String DEST = "PRD500";
     final static String SUFFIX = ".jcoDestination";
 
     private Properties connProperties;
@@ -40,7 +45,7 @@ public class SAPEngine {
         connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "");
         connProperties.setProperty(DestinationDataProvider.JCO_USER, "");
         connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "RU");
+        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "");
         createDestinationDataFile(DEST, connProperties);
     }
 
@@ -411,8 +416,8 @@ public class SAPEngine {
                             (txtPosition.charAt(0) == '0' && txtPosition.charAt(1) == '8')) {
 
                         String[] posTxt = txtPosition.split(" ");
-
                         long delivery = Long.parseLong(posTxt[0]);
+
                         CashDocument cd = new CashDocument();
                         cd.setId(docs.getLong("POSTING_NUMBER"));
                         cd.setCajoNumber(docs.getString("CAJO_NUMBER"));
@@ -423,6 +428,7 @@ public class SAPEngine {
                         cd.setDeliveryId(delivery);
                         cd.setAmount(docs.getBigDecimal("H_NET_AMOUNT"));
                         dbEngine.saveCashDocument(cd);
+                        readDeliveryInfoByKey(delivery, cd.getCompanyId());
                     }
 
                 } while (docs.nextRow());
@@ -453,6 +459,94 @@ public class SAPEngine {
         } else {
             return txtValue;
         }
+    }
+
+    private void readDeliveryInfoByKey(long deliveryId, String companyCode) throws JCoException {
+
+        JCoFunction bapiDeList = destination.getRepository().getFunction("BAPI_DELIVERY_GETLIST");
+        if (bapiDeList == null) {
+            throw new RuntimeException("Function BAPI_DELIVERY_GETLIST not found");
+        }
+
+        bapiDeList.getImportParameterList()
+                .getStructure("IS_DLV_DATA_CONTROL")
+                .setValue("ITEM", "X");
+        bapiDeList.getImportParameterList()
+                .getStructure("IS_DLV_DATA_CONTROL")
+                .setValue("ITEM_STATUS", "X");
+        bapiDeList.getImportParameterList()
+                .getStructure("IS_DLV_DATA_CONTROL")
+                .setValue("DOC_FLOW", "X");
+
+        JCoTable tabVbeln = bapiDeList.getTableParameterList().getTable("IT_VBELN");
+        tabVbeln.appendRow();
+        tabVbeln.setValue("SIGN", "I");
+        tabVbeln.setValue("OPTION", "EQ");
+        tabVbeln.setValue("DELIV_NUMB_LOW", alphaTransform(deliveryId));
+        tabVbeln.setValue("DELIV_NUMB_HIGH", alphaTransform(deliveryId));
+
+        bapiDeList.execute(destination);
+
+        JCoTable head = bapiDeList.getTableParameterList().getTable("ET_DELIVERY_HEADER");
+        if (head.getNumRows() > 0) {
+            do {
+                DeliveryHead dh = new DeliveryHead();
+                dh.setId(head.getLong("VBELN"));
+                dh.setCompanyId(companyCode);
+                dh.setPartnerId(head.getString("KUNAG"));
+                java.util.Date dt = head.getDate("WADAT");
+                java.sql.Date sdt = new java.sql.Date(dt.getTime());
+                dh.setPostingDate(sdt);
+                dbEngine.saveDeliveryHead(dh);
+            } while (head.nextRow());
+        }
+
+        // Get the prices and VAT rates
+        Map<Long, BigDecimal[]> salesInfo = readSalesOrderByDelivery(deliveryId);
+
+        JCoTable items = bapiDeList.getTableParameterList().getTable("ET_DELIVERY_ITEM");
+        if (items.getNumRows() > 0) {
+            do {
+                DeliveryItem dit = new DeliveryItem();
+                dit.setId(items.getLong("VBELN"));
+                dit.setPosition(items.getLong("POSNR"));
+                dit.setMaterialId(items.getLong("MATNR"));
+                dit.setQuantity(items.getBigDecimal("LFIMG"));
+                BigDecimal[] sd = salesInfo.get(dit.getMaterialId());
+                if (sd.length == 2) {
+                    dit.setPrice(sd[0]);
+                    dit.setVat(sd[1]);
+                }
+                dbEngine.saveDeliveryItem(dit);
+            } while (items.nextRow());
+        }
+
+    } // read a delivery by key
+
+    private Map<Long, BigDecimal[]> readSalesOrderByDelivery(long key) {
+
+        // BigDecimal array with the length equals 2
+        Map<Long, BigDecimal[]> prices = new ConcurrentHashMap<>();
+
+
+        return prices;
+    }
+
+    // Add initial zeroes
+    private String alphaTransform(long value) {
+
+        final int MAX_LENGTH = 10; // Length of field in SAP
+        String txtValue = String.valueOf(value);
+
+        int diff = MAX_LENGTH - txtValue.length();
+
+        if (diff > 0) {
+            for (int i = 1; i <= diff; i++) {
+                txtValue = "0" + txtValue;
+            }
+        }
+
+        return txtValue;
     }
 
 }

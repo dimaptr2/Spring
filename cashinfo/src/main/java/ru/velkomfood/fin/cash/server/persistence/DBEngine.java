@@ -4,8 +4,7 @@ import com.sap.conn.jco.JCoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.velkomfood.fin.cash.server.model.master.*;
-import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
-import ru.velkomfood.fin.cash.server.model.transaction.ICashDocumentRepository;
+import ru.velkomfood.fin.cash.server.model.transaction.*;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -43,6 +42,10 @@ public class DBEngine {
     // transaction data
     @Autowired
     private ICashDocumentRepository iCashDocumentRepository;
+    @Autowired
+    private IDeliveryHeadRepository iDeliveryHeadRepository;
+    @Autowired
+    private IDeliveryItemRepository iDeliveryItemRepository;
 
     @PostConstruct
     public void startInstancePreparation() throws JCoException, SQLException {
@@ -249,5 +252,15 @@ public class DBEngine {
 
     // Outgoing deliveries
 
+    // Headers
+    public void saveDeliveryHead(DeliveryHead deliveryHead) {
+        iDeliveryHeadRepository.save(deliveryHead);
+    }
+
+    // Items
+
+    public void saveDeliveryItem(DeliveryItem deliveryItem) {
+        iDeliveryItemRepository.save(deliveryItem);
+    }
     // Sales orders
 }

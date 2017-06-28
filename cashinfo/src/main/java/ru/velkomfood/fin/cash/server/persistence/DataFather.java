@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -43,7 +45,16 @@ public class DataFather {
 
     public void takeNewDocuments() throws SQLException, JCoException {
 
-        sapEngine.readCashDocumentsByDate(java.sql.Date.valueOf("2017-06-26"));
+        DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+
+        long dt1 = new Date().getTime();
+        long dt2 = dt1;
+
+        java.sql.Date d1 = new java.sql.Date(dt1);
+        java.sql.Date d2 = new java.sql.Date(dt2);
+
+        sapEngine.readCashDocumentsByDate(d1, d2);
+
     }
 
     public void updateDictionaries() throws SQLException, JCoException {
@@ -55,8 +66,6 @@ public class DataFather {
         System.out.printf("Number partners %d\n", n2);
 
     }
-
-
 
     private void showMessageAboutExecutionTime(long m1, long m2) {
 
