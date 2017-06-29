@@ -32,11 +32,15 @@ public class DeliveryItem implements Serializable {
     @Column(precision = 20, scale = 2)
     private BigDecimal vat;
 
+    @Column(name = "vat_rate")
+    private int vatRate;
+
     public DeliveryItem() { }
 
     public DeliveryItem(long id, long position,
                         long materialId, String description,
-                        BigDecimal quantity, BigDecimal price, BigDecimal vat) {
+                        BigDecimal quantity, BigDecimal price,
+                        BigDecimal vat, int vatRate) {
         this.id = id;
         this.position = position;
         this.materialId = materialId;
@@ -44,6 +48,7 @@ public class DeliveryItem implements Serializable {
         this.quantity = quantity;
         this.price = price;
         this.vat = vat;
+        this.vatRate = vatRate;
     }
 
     public long getId() {
@@ -100,6 +105,14 @@ public class DeliveryItem implements Serializable {
 
     public void setVat(BigDecimal vat) {
         this.vat = vat;
+    }
+
+    public int getVatRate() {
+        return vatRate;
+    }
+
+    public void setVatRate(int vatRate) {
+        this.vatRate = vatRate;
     }
 
     @Override

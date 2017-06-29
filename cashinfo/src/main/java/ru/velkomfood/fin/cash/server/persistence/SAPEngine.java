@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SAPEngine {
 
-    final static String DEST = "PRD500";
+    final static String DEST = "XXX";
     final static String SUFFIX = ".jcoDestination";
 
     private Properties connProperties;
@@ -37,13 +38,13 @@ public class SAPEngine {
 
     public SAPEngine() {
         connProperties = new Properties();
-        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "rups15.eatmeat.ru");
-        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "02");
-        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "PRD");
-        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "500");
-        connProperties.setProperty(DestinationDataProvider.JCO_USER, "BGD_ADMIN");
-        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "123qweASD");
-        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "RU");
+        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_USER, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "");
         createDestinationDataFile(DEST, connProperties);
     }
 
@@ -497,7 +498,8 @@ public class SAPEngine {
                 dh.setId(head.getLong("VBELN"));
                 dh.setDeliveryTypeId(2);   // outbound delivery
                 dh.setCompanyId(companyCode);
-                dh.setPartnerId(head.getString("KUNAG"));
+                String customer = "1-" + head.getString("KUNAG");
+                dh.setPartnerId(customer);
                 java.util.Date dt = head.getDate("WADAT");
                 java.sql.Date sdt = new java.sql.Date(dt.getTime());
                 dh.setPostingDate(sdt);
@@ -521,6 +523,7 @@ public class SAPEngine {
                 if (sd.length == 2) {
                     dit.setPrice(sd[0]);
                     dit.setVat(sd[1]);
+                    dit.setVatRate(calculateVATrate(dit.getPrice(), dit.getQuantity(), dit.getVat()));
                 }
                 dbEngine.saveDeliveryItem(dit);
             } while (items.nextRow());
@@ -574,7 +577,7 @@ public class SAPEngine {
                     if (!prices.containsKey(material)) {
                         BigDecimal[] values = new BigDecimal[2];
                         values[0] = vbap.getBigDecimal("NETPR"); // unit price
-                        values[1] = vbap.getBigDecimal("KZWI5"); // unit rate of VAT
+                        values[1] = vbap.getBigDecimal("KZWI5");
                         prices.put(material, values);
                     }
                 } while (vbap.nextRow());
@@ -599,6 +602,33 @@ public class SAPEngine {
         }
 
         return txtValue;
+    }
+
+    // Back calculation VAT
+    private int calculateVATrate(BigDecimal price, BigDecimal quantity, BigDecimal vat) {
+
+        final BigDecimal ZERO = new BigDecimal(0.00);
+        final BigDecimal HUNDRED = new BigDecimal(100.00);
+        BigDecimal value;
+        BigDecimal rounded = ZERO;
+        int rate;
+
+        BigDecimal diValue = price.multiply(quantity);
+
+        if (!diValue.equals(ZERO)) {
+            value = vat.divide(diValue).multiply(HUNDRED);
+            rounded = value.setScale(0);
+        }
+
+        rate = rounded.intValue();
+
+        if (rate <= 10) {
+            rate = 10;
+        } else {
+            rate = 18;
+        }
+
+        return rate;
     }
 
 }

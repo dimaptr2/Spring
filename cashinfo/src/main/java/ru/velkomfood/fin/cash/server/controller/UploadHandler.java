@@ -38,7 +38,7 @@ public class UploadHandler {
 
 //    representing: second, minute, hour, day, month, weekday
     // Start every day at 1 minute at 7-20 hours
-    @Scheduled(cron = "0 2/32 * * * 1-5")
+    @Scheduled(cron = "0 55 17 * * 1-5")
     public void uploadTransactionData() {
 
         System.out.println("Ok! Start uploading task!");

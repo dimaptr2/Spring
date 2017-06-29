@@ -29,10 +29,8 @@ public class Material implements Serializable {
 
     public Material() { }
 
-    public Material(long id, String description,
-                    String uom,
-                    BigDecimal priceUnit,
-                    BigDecimal cost) {
+    public Material(long id, String description, String uom,
+                    BigDecimal priceUnit, BigDecimal cost) {
         this.id = id;
         this.description = description;
         this.uom = uom;
