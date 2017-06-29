@@ -10,7 +10,6 @@ import ru.velkomfood.fin.cash.server.model.master.Partner;
 import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
 import ru.velkomfood.fin.cash.server.model.transaction.DeliveryHead;
 import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItem;
-import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItemId;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -18,7 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SAPEngine {
 
-    final static String DEST = "CCCC";
+    final static String DEST = "PRD500";
     final static String SUFFIX = ".jcoDestination";
 
     private Properties connProperties;
@@ -39,13 +37,13 @@ public class SAPEngine {
 
     public SAPEngine() {
         connProperties = new Properties();
-        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_USER, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "");
-        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "rups15.eatmeat.ru");
+        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "02");
+        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "PRD");
+        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "500");
+        connProperties.setProperty(DestinationDataProvider.JCO_USER, "BGD_ADMIN");
+        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "123qweASD");
+        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "RU");
         createDestinationDataFile(DEST, connProperties);
     }
 
@@ -411,7 +409,9 @@ public class SAPEngine {
                 do {
 
                     String txtPosition = docs.getString("POSITION_TEXT");
-
+                    if (txtPosition == null || txtPosition.equals("")) {
+                        continue;
+                    }
                     if (txtPosition.charAt(0) == '8' ||
                             (txtPosition.charAt(0) == '0' && txtPosition.charAt(1) == '8')) {
 
@@ -435,6 +435,8 @@ public class SAPEngine {
 
             } // number rows
 
+        } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
 
             JCoContext.end(destination);
@@ -462,7 +464,7 @@ public class SAPEngine {
     }
 
     // Delivery processing
-    private void readDeliveryInfoByKey(long deliveryId, String companyCode) throws JCoException {
+    private void readDeliveryInfoByKey(long deliveryId, String companyCode) throws JCoException, SQLException {
 
         JCoFunction bapiDeList = destination.getRepository().getFunction("BAPI_DELIVERY_GETLIST");
         if (bapiDeList == null) {
@@ -493,6 +495,7 @@ public class SAPEngine {
             do {
                 DeliveryHead dh = new DeliveryHead();
                 dh.setId(head.getLong("VBELN"));
+                dh.setDeliveryTypeId(2);   // outbound delivery
                 dh.setCompanyId(companyCode);
                 dh.setPartnerId(head.getString("KUNAG"));
                 java.util.Date dt = head.getDate("WADAT");

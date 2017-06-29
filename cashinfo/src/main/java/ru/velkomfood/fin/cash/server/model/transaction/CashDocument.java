@@ -129,18 +129,5 @@ public class CashDocument implements Serializable {
         return (int) (id ^ (id >>> 32));
     }
 
-    @Override
-    public String toString() {
-        return "CashDocument{" +
-                "id=" + id +
-                ", cajoNumber='" + cajoNumber + '\'' +
-                ", companyId='" + companyId + '\'' +
-                ", year=" + year +
-                ", postingDate=" + postingDate +
-                ", positionText='" + positionText + '\'' +
-                ", deliveryId=" + deliveryId +
-                ", amount=" + amount +
-                '}';
-    }
 
 }

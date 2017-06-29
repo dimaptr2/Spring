@@ -59,12 +59,4 @@ public class DeliveryType implements Serializable {
         return id;
     }
 
-    @Override
-    public String toString() {
-        return "DeliveryType{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                '}';
-    }
-
 }

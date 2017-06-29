@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -24,6 +22,8 @@ public class DataFather {
     public void takeNewDictionaries() throws SQLException, JCoException {
 
         long t1 = new Date().getTime();
+
+        // We should get documents for last week before and for today
 
         System.out.println("Start database initialization");
 
@@ -45,15 +45,21 @@ public class DataFather {
 
     public void takeNewDocuments() throws SQLException, JCoException {
 
-        DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        long dt1 = new Date().getTime(); // Current day in milliseconds
+        final long DAY_IN_MS = 86400000; // A day in milliseconds
 
-        long dt1 = new Date().getTime();
-        long dt2 = dt1;
+        // We should get documents for last week and for today
+        long[] days = new long[7];
+        days[6] = dt1;
+        for (int i = 5; i >= 0; i--) {
+            days[i] = days[i + 1] - DAY_IN_MS;
+        }
 
-        java.sql.Date d1 = new java.sql.Date(dt1);
-        java.sql.Date d2 = new java.sql.Date(dt2);
-
-        sapEngine.readCashDocumentsByDate(d1, d2);
+        //
+        for (int j = 0; j < days.length; j++) {
+            java.sql.Date d1 = new java.sql.Date(days[j]);
+            sapEngine.readCashDocumentsByDate(d1, d1);
+        }
 
     }
 

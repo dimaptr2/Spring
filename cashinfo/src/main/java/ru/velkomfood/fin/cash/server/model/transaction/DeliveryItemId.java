@@ -52,12 +52,4 @@ public class DeliveryItemId implements Serializable {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "DeliveryItemId{" +
-                "id=" + id +
-                ", position=" + position +
-                '}';
-    }
-
 }

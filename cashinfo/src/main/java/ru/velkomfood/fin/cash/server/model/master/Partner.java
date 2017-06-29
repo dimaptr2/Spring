@@ -109,17 +109,5 @@ public class Partner implements Serializable {
         return id != null ? id.hashCode() : 0;
     }
 
-    @Override
-    public String toString() {
-        return "Partner{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", indicator=" + indicator +
-                ", postcode='" + postcode + '\'' +
-                ", country='" + country + '\'' +
-                ", city='" + city + '\'' +
-                ", street='" + street + '\'' +
-                '}';
-    }
 
 }

@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
 import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
+import ru.velkomfood.fin.cash.server.model.transaction.Delivery;
+import ru.velkomfood.fin.cash.server.model.transaction.DeliveryHead;
+import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItem;
 import ru.velkomfood.fin.cash.server.persistence.DBEngine;
 
 import java.sql.Date;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -111,7 +113,38 @@ public class Respondent {
     }
 
     // Outgoing deliveries
+    @RequestMapping("/delivery")
+    public Delivery readDeliveryInfo(
+            @RequestParam(value = "delId", defaultValue = "") String delId) {
 
-    // Sales orders
+        long idValue = Long.parseLong(delId);
+
+        Delivery delivery = new Delivery();
+
+        delivery.setHead(dbEngine.readDeliveryHeadByKey(idValue));
+        delivery.setItems(dbEngine.readDeliveryItemsByKey(idValue));
+
+        return delivery;
+    }
+
+    @RequestMapping("/headkey")
+    public DeliveryHead readDeliveryHeadByKey(
+            @RequestParam(value = "key", defaultValue = "") String key
+    ) {
+
+        long delivery = Long.parseLong(key);
+
+        return dbEngine.readDeliveryHeadByKey(delivery);
+    }
+
+    @RequestMapping("/itemskey")
+    public List<DeliveryItem> readDeliveryItemsByKey(
+        @RequestParam(value = "key", defaultValue = "") String key
+    ) {
+
+        long delivery = Long.parseLong(key);
+
+        return dbEngine.readDeliveryItemsByKey(delivery);
+    }
 
 }

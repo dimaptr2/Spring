@@ -16,6 +16,8 @@ public class DeliveryHead implements Serializable {
 
     @Id
     private long id;
+    @Column(name = "delivery_type_id", nullable = false)
+    private int deliveryTypeId;
     @Column(name = "company_id", length = 4, nullable = false)
     private String companyId;
     @Column(name = "partner_id", length = 12, nullable = false)
@@ -26,11 +28,10 @@ public class DeliveryHead implements Serializable {
 
     public DeliveryHead() { }
 
-    public DeliveryHead(long id,
-                        String companyId,
-                        String partnerId,
-                        Date postingDate) {
+    public DeliveryHead(long id, int deliveryTypeId,
+                        String companyId, String partnerId, Date postingDate) {
         this.id = id;
+        this.deliveryTypeId = deliveryTypeId;
         this.companyId = companyId;
         this.partnerId = partnerId;
         this.postingDate = postingDate;
@@ -42,6 +43,14 @@ public class DeliveryHead implements Serializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public int getDeliveryTypeId() {
+        return deliveryTypeId;
+    }
+
+    public void setDeliveryTypeId(int deliveryTypeId) {
+        this.deliveryTypeId = deliveryTypeId;
     }
 
     public String getCompanyId() {
@@ -81,16 +90,6 @@ public class DeliveryHead implements Serializable {
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
-    }
-
-    @Override
-    public String toString() {
-        return "DeliveryHead{" +
-                "id=" + id +
-                ", companyId='" + companyId + '\'' +
-                ", partnerId='" + partnerId + '\'' +
-                ", postingDate=" + postingDate +
-                '}';
     }
 
 }

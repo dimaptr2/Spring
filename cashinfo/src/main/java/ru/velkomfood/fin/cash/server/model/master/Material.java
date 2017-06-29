@@ -95,15 +95,4 @@ public class Material implements Serializable {
         return (int) (id ^ (id >>> 32));
     }
 
-    @Override
-    public String toString() {
-        return "Material{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                ", uom='" + uom + '\'' +
-                ", priceUnit=" + priceUnit +
-                ", cost=" + cost +
-                '}';
-    }
-
 }

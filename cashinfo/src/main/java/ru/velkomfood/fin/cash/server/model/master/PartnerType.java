@@ -57,12 +57,4 @@ public class PartnerType implements Serializable {
         return id;
     }
 
-    @Override
-    public String toString() {
-        return "PartnerType{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                '}';
-    }
-
 }

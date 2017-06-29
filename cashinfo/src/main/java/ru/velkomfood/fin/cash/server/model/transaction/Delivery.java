@@ -73,12 +73,4 @@ public class Delivery implements Serializable {
         return head.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return "Delivery{" +
-                "head=" + head +
-                ", items=" + items +
-                '}';
-    }
-
 }
