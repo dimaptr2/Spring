@@ -27,15 +27,20 @@ public class Material implements Serializable {
     @Column(precision = 20, scale = 2)
     private BigDecimal cost;
 
+    @Column(name = "vat_rate")
+    private int vatRate;
+
     public Material() { }
 
-    public Material(long id, String description, String uom,
-                    BigDecimal priceUnit, BigDecimal cost) {
+    public Material(long id, String description,
+                    String uom, BigDecimal priceUnit,
+                    BigDecimal cost, int vatRate) {
         this.id = id;
         this.description = description;
         this.uom = uom;
         this.priceUnit = priceUnit;
         this.cost = cost;
+        this.vatRate = vatRate;
     }
 
     public long getId() {
@@ -76,6 +81,14 @@ public class Material implements Serializable {
 
     public void setCost(BigDecimal cost) {
         this.cost = cost;
+    }
+
+    public int getVatRate() {
+        return vatRate;
+    }
+
+    public void setVatRate(int vatRate) {
+        this.vatRate = vatRate;
     }
 
     @Override

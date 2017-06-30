@@ -4,6 +4,7 @@ import com.sap.conn.jco.*;
 import com.sap.conn.jco.ext.DestinationDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.velkomfood.fin.cash.server.model.master.Channel;
 import ru.velkomfood.fin.cash.server.model.master.Company;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
@@ -134,6 +135,7 @@ public class SAPEngine {
     public int readAllMaterialsFromSAP() throws JCoException, SQLException {
 
         final BigDecimal ZERO = new BigDecimal(0.000);
+        final BigDecimal UNIT = new BigDecimal(1.000);
 
         int counter = 0;
 
@@ -145,15 +147,15 @@ public class SAPEngine {
             throw new RuntimeException("Function BAPI_MATERIAL_GETLIST not found");
         }
 
-        JCoFunction bapiMatDetails = destination
-                .getRepository()
-                .getFunction("BAPI_MATERIAL_GET_DETAIL");
-
-        if (bapiMatDetails == null) {
-            throw new RuntimeException("Function BAPI_MATERIAL_GET_DETAIL not found");
+        JCoFunction rfcMatInfo = destination.getRepository().getFunction("Z_RFC_GET_MATERIAL_INFO");
+        if (rfcMatInfo == null) {
+            throw new RuntimeException("Function Z_RFC_GET_MATERIAL_INFO not found");
         }
 
         JCoTable matSels = bapiMatList.getTableParameterList().getTable("MATNRSELECTION");
+
+        // We need for sales channels for the tax rates searching
+        List<Channel> channels = dbEngine.readAllSalesChannels();
 
         // Define material ranges for the searching
         matSels.appendRow();
@@ -194,51 +196,74 @@ public class SAPEngine {
                 do {
 
                     Material m = new Material();
-
                     String txtMaterial = matab.getString("MATERIAL");
                     m.setId(matab.getLong("MATERIAL"));
                     m.setDescription(matab.getString("MATL_DESC"));
-                    bapiMatDetails.getImportParameterList().setValue("MATERIAL", txtMaterial);
-                    bapiMatDetails.getImportParameterList().setValue("PLANT", "1000");
-                    bapiMatDetails.getImportParameterList().setValue("VALUATIONAREA", "1000");
-                    // Detailed information about any material
-                    bapiMatDetails.execute(destination);
-                    JCoStructure generalData = bapiMatDetails.getExportParameterList().getStructure("MATERIAL_GENERAL_DATA");
-                    // Unit of measurements
-                    for (JCoField f: generalData) {
-                        if (f.getName().equals("BASE_UOM")) {
-                            m.setUom(f.getString());
-                        }
-                    }
-                    // Cost of material
-                    Map<String, BigDecimal> prices = new HashMap<>();
-                    JCoStructure valuation = bapiMatDetails.getExportParameterList().getStructure("MATERIALVALUATIONDATA");
-                    for (JCoField f: valuation) {
+                    rfcMatInfo.getImportParameterList().setValue("I_PLANT", "1000");
+                    rfcMatInfo.getImportParameterList().setValue("I_MATERIAL", txtMaterial);
+                    rfcMatInfo.execute(destination);
+                    JCoStructure mara = rfcMatInfo.getExportParameterList().getStructure("E_MARA");
+                    for (JCoField f: mara) {
                         switch (f.getName()) {
-                            case "STD_PRICE":
-                                prices.put(f.getName(), f.getBigDecimal());
+                            case "MEINS":
+                                m.setUom(f.getString());
                                 break;
-                            case "MOVING_PR":
-                                prices.put(f.getName(), f.getBigDecimal());
-                                break;
-                            case "PRICE_UNIT":
-                                m.setPriceUnit(f.getBigDecimal());
                         }
                     }
-                    if (!prices.isEmpty()) {
-                        BigDecimal value = prices.get("STD_PRICE");
-                        if (value.equals(ZERO)) {
-                            value = prices.get("MOVING_PR");
+                    Map<String, BigDecimal> prices = new HashMap<>();
+                    JCoStructure mbew = rfcMatInfo.getExportParameterList().getStructure("E_MBEW");
+                    for (JCoField f: mbew) {
+                        switch (f.getName()) {
+                            case "VERPR":
+                                prices.put("V", f.getBigDecimal());
+                                break;
+                            case "STPRS":
+                                prices.put("S", f.getBigDecimal());
+                                break;
+                            case "PEINH":
+                                m.setPriceUnit(f.getBigDecimal());
+                                break;
                         }
-                        if (!m.getPriceUnit().equals(ZERO)) {
-                            value = value.divide(m.getPriceUnit());
-                        }
-                        m.setCost(value);
+                    }
+                    BigDecimal price = prices.get("S");
+                    if (price.equals(ZERO)) {
+                        price = prices.get("V");
+                    }
+                    if (m.getPriceUnit().equals(ZERO)) {
+                        m.setPriceUnit(UNIT);
+                    }
+                    price = price.divide(m.getPriceUnit());
+                    m.setCost(price);
+                    String taxRate = rfcMatInfo.getExportParameterList().getString("E_TAX_TYPE");
+                    switch (taxRate) {
+                        case "1":
+                            m.setVatRate(10);
+                            break;
+                        case "2":
+                            m.setVatRate(18);
+                            break;
+                        case "3":
+                            m.setVatRate(10);
+                            break;
+                        case "4":
+                            m.setVatRate(18);
+                            break;
+                        case "5":
+                            m.setVatRate(10);
+                            break;
+                        case "6":
+                            m.setVatRate(18);
+                            break;
+                        case "8":
+                            m.setVatRate(10);
+                            break;
+                        default:
+                            m.setVatRate(18);
+                            break;
                     }
                     // Update or insert the material in the database
                     dbEngine.saveMaterial(m);
                     counter++;
-
                 } while (matab.nextRow());
 
             } // number rows is not null
@@ -523,7 +548,12 @@ public class SAPEngine {
                 if (sd.length == 2) {
                     dit.setPrice(sd[0]);
                     dit.setVat(sd[1]);
-                    dit.setVatRate(calculateVATrate(dit.getPrice(), dit.getQuantity(), dit.getVat()));
+//                    dit.setVatRate(calculateVATrate(dit.getPrice(), dit.getQuantity(), dit.getVat()));
+                }
+                // Define the tax rate from the material master data
+                Material matMaster = dbEngine.readMaterialByKey(dit.getMaterialId());
+                if (matMaster != null) {
+                    dit.setVatRate(matMaster.getVatRate());
                 }
                 dbEngine.saveDeliveryItem(dit);
             } while (items.nextRow());
@@ -604,31 +634,5 @@ public class SAPEngine {
         return txtValue;
     }
 
-    // Back calculation VAT
-    private int calculateVATrate(BigDecimal price, BigDecimal quantity, BigDecimal vat) {
-
-        final BigDecimal ZERO = new BigDecimal(0.00);
-        final BigDecimal HUNDRED = new BigDecimal(100.00);
-        BigDecimal value;
-        BigDecimal rounded = ZERO;
-        int rate;
-
-        BigDecimal diValue = price.multiply(quantity);
-
-        if (!diValue.equals(ZERO)) {
-            value = vat.divide(diValue).multiply(HUNDRED);
-            rounded = value.setScale(0);
-        }
-
-        rate = rounded.intValue();
-
-        if (rate <= 10) {
-            rate = 10;
-        } else {
-            rate = 18;
-        }
-
-        return rate;
-    }
 
 }

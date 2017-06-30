@@ -25,7 +25,7 @@ public class UploadHandler {
     }
 
 //    Run every day at 22:00 o'clock
-    @Scheduled(cron = "0 0 22 * * *")
+    @Scheduled(cron = "0 15 22 * * *")
     public void uploadMasterData() {
 
         try {
@@ -38,7 +38,7 @@ public class UploadHandler {
 
 //    representing: second, minute, hour, day, month, weekday
     // Start every day at 1 minute at 7-20 hours
-    @Scheduled(cron = "0 55 17 * * 1-5")
+    @Scheduled(cron = "0 1 1 * * 1-5")
     public void uploadTransactionData() {
 
         System.out.println("Ok! Start uploading task!");
