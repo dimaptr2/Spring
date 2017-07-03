@@ -1,17 +1,16 @@
 package ru.velkomfood.fin.cash.server.model.transaction;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Created by dpetrov on 30.06.17.
+ * Created by dpetrov on 03.07.17.
  */
 @Entity
 @Table(name = "distr_items")
-public class DistributedItem {
+@IdClass(DeliveryItemId.class)
+public class DistributedItem implements Serializable {
 
     @Id
     private long id;
@@ -39,10 +38,9 @@ public class DistributedItem {
     public DistributedItem() { }
 
     public DistributedItem(long id, long position,
-                           long materialId,
-                           String description, BigDecimal quantity,
-                           BigDecimal price, BigDecimal vat,
-                           int vatRate) {
+                           long materialId, String description,
+                           BigDecimal quantity, BigDecimal price,
+                           BigDecimal vat, int vatRate) {
         this.id = id;
         this.position = position;
         this.materialId = materialId;

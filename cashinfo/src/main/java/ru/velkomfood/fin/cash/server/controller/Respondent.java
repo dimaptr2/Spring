@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
-import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
-import ru.velkomfood.fin.cash.server.model.transaction.Delivery;
-import ru.velkomfood.fin.cash.server.model.transaction.DeliveryHead;
-import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItem;
+import ru.velkomfood.fin.cash.server.model.transaction.*;
 import ru.velkomfood.fin.cash.server.persistence.DBEngine;
 
 import java.sql.Date;
@@ -138,13 +135,15 @@ public class Respondent {
     }
 
     @RequestMapping("/itemskey")
-    public List<DeliveryItem> readDeliveryItemsByKey(
+    public List<DistributedItem> readDeliveryItemsByKey(
         @RequestParam(value = "key", defaultValue = "") String key
     ) {
 
         long delivery = Long.parseLong(key);
 
-        return dbEngine.readDeliveryItemsByKey(delivery);
+        return dbEngine.readDistributedItemsByKey(delivery);
     }
+
+
 
 }

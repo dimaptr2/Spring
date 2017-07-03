@@ -2,6 +2,7 @@ package ru.velkomfood.fin.cash.server.model.transaction;
 
 import org.springframework.data.repository.CrudRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**

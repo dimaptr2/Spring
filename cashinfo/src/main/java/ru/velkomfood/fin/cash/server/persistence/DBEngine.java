@@ -8,6 +8,8 @@ import ru.velkomfood.fin.cash.server.model.transaction.*;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,6 +52,8 @@ public class DBEngine {
     private IDeliveryHeadRepository iDeliveryHeadRepository;
     @Autowired
     private IDeliveryItemRepository iDeliveryItemRepository;
+    @Autowired
+    private IDistributedItemRepository iDistributedItemRepository;
 
     @PostConstruct
     public void startInstancePreparation() throws JCoException, SQLException {
@@ -337,5 +341,37 @@ public class DBEngine {
         return iDeliveryItemRepository.findDeliveryItemById(key);
     }
 
-    // Sales orders
+    public List<DeliveryItem> readAllDeliveries() {
+        return iDeliveryItemRepository.findAll();
+    }
+
+    public void deleteZerosDeliveryItems() throws SQLException {
+
+        StringBuilder sb = new StringBuilder(0)
+                .append("DELETE FROM delivery_item WHERE quantity = 0.000");
+
+        PreparedStatement pstmt = null;
+
+        try {
+            pstmt = dataSource.getConnection().prepareStatement(sb.toString());
+            pstmt.executeUpdate();
+        } finally {
+            pstmt.close();
+        }
+
+    }
+
+    // Distributed items
+    public List<DistributedItem> readDistributedItemsByKey(long id) {
+        return iDistributedItemRepository.findDistributedItemById(id);
+    }
+
+    public DistributedItem singleReadDistributedItem(long id, long position) {
+        return iDistributedItemRepository.findDistributedItemByIdAndPosition(id, position);
+    }
+
+    public void saveDistributedItem(DistributedItem distributedItem) {
+        iDistributedItemRepository.save(distributedItem);
+    }
+
 }
