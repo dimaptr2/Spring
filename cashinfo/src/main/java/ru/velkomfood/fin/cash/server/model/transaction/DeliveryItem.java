@@ -26,7 +26,7 @@ public class DeliveryItem implements Serializable {
     @Column(precision = 20, scale = 3)
     private BigDecimal quantity;
 
-    @Column(precision = 20, length = 2)
+    @Column(precision = 20, scale = 2)
     private BigDecimal price;
 
     @Column(precision = 20, scale = 2)
@@ -35,12 +35,16 @@ public class DeliveryItem implements Serializable {
     @Column(name = "vat_rate")
     private int vatRate;
 
+    @Column(name = "net_price", precision = 20, scale = 2)
+    private BigDecimal netPrice;
+
     public DeliveryItem() { }
 
     public DeliveryItem(long id, long position,
                         long materialId, String description,
                         BigDecimal quantity, BigDecimal price,
-                        BigDecimal vat, int vatRate) {
+                        BigDecimal vat, int vatRate,
+                        BigDecimal netPrice) {
         this.id = id;
         this.position = position;
         this.materialId = materialId;
@@ -49,6 +53,7 @@ public class DeliveryItem implements Serializable {
         this.price = price;
         this.vat = vat;
         this.vatRate = vatRate;
+        this.netPrice = netPrice;
     }
 
     public long getId() {
@@ -115,15 +120,23 @@ public class DeliveryItem implements Serializable {
         this.vatRate = vatRate;
     }
 
+    public BigDecimal getNetPrice() {
+        return netPrice;
+    }
+
+    public void setNetPrice(BigDecimal netPrice) {
+        this.netPrice = netPrice;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DeliveryItem that = (DeliveryItem) o;
+        DeliveryItem item = (DeliveryItem) o;
 
-        if (id != that.id) return false;
-        return position == that.position;
+        if (id != item.id) return false;
+        return position == item.position;
     }
 
     @Override

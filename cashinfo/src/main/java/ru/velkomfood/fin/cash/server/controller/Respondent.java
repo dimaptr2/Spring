@@ -1,5 +1,6 @@
 package ru.velkomfood.fin.cash.server.controller;
 
+import com.sap.conn.jco.JCoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -8,8 +9,10 @@ import ru.velkomfood.fin.cash.server.model.master.Material;
 import ru.velkomfood.fin.cash.server.model.master.Partner;
 import ru.velkomfood.fin.cash.server.model.transaction.*;
 import ru.velkomfood.fin.cash.server.persistence.DBEngine;
+import ru.velkomfood.fin.cash.server.persistence.DataFather;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -20,6 +23,8 @@ public class Respondent {
 
     @Autowired
     private DBEngine dbEngine;
+    @Autowired
+    private DataFather dataFather;
 
     // Requests for materials
 
@@ -103,8 +108,15 @@ public class Respondent {
             @RequestParam(value = "toValue", defaultValue = "") String toValue
     ) {
 
+        try {
+            dataFather.takeNewDocuments();
+        } catch (SQLException | JCoException ex) {
+            ex.printStackTrace();
+        }
+
         java.sql.Date fromDate = Date.valueOf(fromValue);
         java.sql.Date toDate = Date.valueOf(toValue);
+
 
         return dbEngine.readCashDocumentsByDateBetween(fromDate, toDate);
     }
@@ -135,12 +147,20 @@ public class Respondent {
     }
 
     @RequestMapping("/itemskey")
-    public List<DistributedItem> readDeliveryItemsByKey(
+    public List<DeliveryItem> readDeliveryItemsByKey(
         @RequestParam(value = "key", defaultValue = "") String key
     ) {
 
         long delivery = Long.parseLong(key);
 
+        return dbEngine.readDeliveryItemsByKey(delivery);
+    }
+
+    @RequestMapping("/distrkey")
+    public List<DistributedItem> readDistributedItemsByKey(
+            @RequestParam(value = "key", defaultValue = "") String key
+    ) {
+        long delivery = Long.parseLong(key);
         return dbEngine.readDistributedItemsByKey(delivery);
     }
 

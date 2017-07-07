@@ -13,4 +13,5 @@ public interface IDeliveryItemRepository extends CrudRepository<DeliveryItem, De
     List<DeliveryItem> findAll();
     List<DeliveryItem> findDeliveryItemById(long id);
 
+
 }

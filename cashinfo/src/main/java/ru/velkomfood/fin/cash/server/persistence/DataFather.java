@@ -62,20 +62,11 @@ public class DataFather {
         long dt1 = new Date().getTime(); // Current day in milliseconds
         final long DAY_IN_MS = 86400000; // A day in milliseconds
 
-        long yesterday = dt1 - DAY_IN_MS;
+        java.sql.Date d1 = new java.sql.Date(dt1);
+        java.sql.Date d2 = new java.sql.Date(dt1 - DAY_IN_MS);
 
-        if (dbEngine.readCashDocumentsByDate(new java.sql.Date(yesterday)).isEmpty()) {
-
-            java.sql.Date to = new java.sql.Date(dt1);
-            java.sql.Date from = new java.sql.Date((dt1 - (30 * DAY_IN_MS)));
-            getCashDocuments(from, to);
-
-        } else {
-
-            java.sql.Date currentDate = new java.sql.Date(dt1);
-            getCashDocuments(currentDate, currentDate);
-
-        }
+        getCashDocuments(d1, d1);
+        getCashDocuments(d2, d2);
 
     }
 
@@ -133,18 +124,18 @@ public class DataFather {
             docs.forEach(row -> {
 
                 List<DeliveryItem> items = dbEngine.readDeliveryItemsByKey(row.getDeliveryId());
-                Queue<DeliveryItem> cache = new ConcurrentLinkedQueue<>();
 
                 if (items != null && !items.isEmpty()) {
 
                     double totalAmount = calculateSum(items);
-                    double ratio = row.getAmount().doubleValue() / totalAmount;
+                    double ratio = (totalAmount - row.getAmount().doubleValue()) / totalAmount;
+                    double grossPrice = 0.00;
 
                     BigDecimal value = BigDecimal.valueOf(ratio)
                             .setScale(4, BigDecimal.ROUND_FLOOR);
-                    BigDecimal sum = new BigDecimal(0.00);
 
                     for (DeliveryItem di : items) {
+                        grossPrice += di.getNetPrice().add(di.getVat()).doubleValue();
                         DistributedItem disit = new DistributedItem();
                         disit.setId(di.getId());
                         disit.setPosition(di.getPosition());
@@ -152,35 +143,30 @@ public class DataFather {
                         disit.setDescription(di.getDescription());
                         disit.setQuantity(di.getQuantity().multiply(value));
                         disit.setPrice(di.getPrice());
-                        sum = sum.add(disit.getQuantity().multiply(disit.getPrice()))
-                                .setScale(2, BigDecimal.ROUND_FLOOR);
+                        double coefficient = 1 - (di.getPrice().doubleValue() / totalAmount);
+                        double q = coefficient * disit.getQuantity().doubleValue();
+                        disit.setQuantity(BigDecimal.valueOf(q).setScale(3, BigDecimal.ROUND_FLOOR));
                         disit.setVat(di.getVat());
                         disit.setVatRate(di.getVatRate());
                         dbEngine.saveDistributedItem(disit);
                     }
 
-                    BigDecimal result = sum.subtract(row.getAmount());
+                    DeliveryHead head = dbEngine.readDeliveryHeadByKey(row.getDeliveryId());
 
-                    Material material = dbEngine.readMaterialByKey(999999999);
-                    if (material != null) {
-                        DistributedItem dit = new DistributedItem();
-                        dit.setId(row.getDeliveryId());
-                        dit.setPosition(material.getId());
-                        dit.setMaterialId(material.getId());
-                        dit.setDescription(material.getDescription());
-                        dit.setQuantity(material.getPriceUnit());
-                        dit.setPrice(result);
-                        dit.setVat(new BigDecimal(0.00));
-                        dit.setVatRate(0);
-                        dbEngine.saveDistributedItem(dit);
+                    if (head != null) {
+                        head.setTotalAmount(BigDecimal.valueOf(grossPrice)
+                                .setScale(2, BigDecimal.ROUND_FLOOR));
+                        dbEngine.saveDeliveryHead(head);
                     }
 
                 } // if items
 
             });
+
         }
 
     }
+
 
     private double calculateSum(List<DeliveryItem> listItems) {
 
@@ -190,12 +176,12 @@ public class DataFather {
 
         while (iterator.hasNext()) {
             DeliveryItem di = iterator.next();
-            sum = sum.add(di.getQuantity().multiply(di.getPrice()));
+            BigDecimal value = di.getQuantity().multiply(di.getPrice());
+            sum = sum.add(value.add(di.getVat()));
         }
 
         return sum.doubleValue();
     }
-
 
 }
 

@@ -26,7 +26,7 @@ public class DistributedItem implements Serializable {
     @Column(precision = 20, scale = 3)
     private BigDecimal quantity;
 
-    @Column(precision = 20, length = 2)
+    @Column(precision = 20, scale = 2)
     private BigDecimal price;
 
     @Column(precision = 20, scale = 2)

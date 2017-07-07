@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Date;
 
 /**
@@ -26,15 +27,20 @@ public class DeliveryHead implements Serializable {
     @Column(name = "posting_date")
     private java.sql.Date postingDate;
 
+    @Column(name = "amount", precision = 20, scale = 2)
+    private BigDecimal totalAmount;
+
     public DeliveryHead() { }
 
     public DeliveryHead(long id, int deliveryTypeId,
-                        String companyId, String partnerId, Date postingDate) {
+                        String companyId, String partnerId,
+                        Date postingDate, BigDecimal totalAmount) {
         this.id = id;
         this.deliveryTypeId = deliveryTypeId;
         this.companyId = companyId;
         this.partnerId = partnerId;
         this.postingDate = postingDate;
+        this.totalAmount = totalAmount;
     }
 
     public long getId() {
@@ -77,6 +83,14 @@ public class DeliveryHead implements Serializable {
         this.postingDate = postingDate;
     }
 
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,12 +98,15 @@ public class DeliveryHead implements Serializable {
 
         DeliveryHead that = (DeliveryHead) o;
 
-        return id == that.id;
+        if (id != that.id) return false;
+        return deliveryTypeId == that.deliveryTypeId;
     }
 
     @Override
     public int hashCode() {
-        return (int) (id ^ (id >>> 32));
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + deliveryTypeId;
+        return result;
     }
 
 }

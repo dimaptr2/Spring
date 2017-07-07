@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by dpetrov on 22.06.17.
@@ -293,6 +294,35 @@ public class DBEngine {
     }
 
     // Transaction data processing
+
+    public void refreshDatabase() throws SQLException {
+
+        StringBuilder sb = new StringBuilder(0);
+
+        sb.append("DELETE FROM cash_journal");
+        Statement stmt = null;
+
+        try {
+
+            stmt = dataSource.getConnection().createStatement();
+
+            stmt.executeUpdate(sb.toString());
+            sb.delete(0, sb.length());
+            sb.append("DELETE FROM delivery_head");
+            stmt.executeUpdate(sb.toString());
+            sb.delete(0, sb.length());
+            sb.append("DELETE FROM delivery_item");
+            stmt.executeUpdate(sb.toString());
+            sb.delete(0, sb.length());
+            sb.append("DELETE FROM distr_items");
+            stmt.executeUpdate(sb.toString());
+            sb.delete(0, sb.length());
+
+        } finally {
+            stmt.close();
+        }
+
+    }
 
     // Cash Documents
 

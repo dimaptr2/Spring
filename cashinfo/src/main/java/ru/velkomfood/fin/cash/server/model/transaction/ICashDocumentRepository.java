@@ -10,13 +10,9 @@ import java.util.List;
 public interface ICashDocumentRepository extends CrudRepository<CashDocument, Long> {
 
     List<CashDocument> findAll();
-
     CashDocument findCashDocumentById(long id);
-
     List<CashDocument> findCashDocumentByPostingDate(java.sql.Date atDate);
-
     List<CashDocument> findCashDocumentByIdBetween(long low, long high);
-
     List<CashDocument> findCashDocumentByPostingDateBetween(java.sql.Date fromDate, java.sql.Date toDate);
 
 }

@@ -545,10 +545,13 @@ public class SAPEngine {
                 dit.setDescription(items.getString("ARKTX"));
                 dit.setQuantity(items.getBigDecimal("LFIMG"));
                 BigDecimal[] sd = salesInfo.get(dit.getMaterialId());
-                if (sd.length == 2) {
+                if (sd.length == 3) {
                     dit.setPrice(sd[0]);
                     dit.setVat(sd[1]);
-//                    dit.setVatRate(calculateVATrate(dit.getPrice(), dit.getQuantity(), dit.getVat()));
+                    dit.setNetPrice(sd[2]);
+//                    if (!dit.getQuantity().equals(new BigDecimal(0.000))) {
+//                        dit.setPrice(sd[2].divide(dit.getQuantity()));
+//                    }
                 }
                 // Define the tax rate from the material master data
                 Material matMaster = dbEngine.readMaterialByKey(dit.getMaterialId());
@@ -605,9 +608,10 @@ public class SAPEngine {
                 do {
                     long material = vbap.getLong("MATNR");
                     if (!prices.containsKey(material)) {
-                        BigDecimal[] values = new BigDecimal[2];
+                        BigDecimal[] values = new BigDecimal[3];
                         values[0] = vbap.getBigDecimal("NETPR"); // unit price
                         values[1] = vbap.getBigDecimal("KZWI5");
+                        values[2] = vbap.getBigDecimal("NETWR");
                         prices.put(material, values);
                     }
                 } while (vbap.nextRow());
