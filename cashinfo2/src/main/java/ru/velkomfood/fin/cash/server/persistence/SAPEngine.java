@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SAPEngine {
 
-    final static String DEST = "PRD500";
+    final static String DEST = "";
     final static String SUFFIX = ".jcoDestination";
 
     private Properties connProperties;
@@ -37,13 +37,13 @@ public class SAPEngine {
 
     public SAPEngine() {
         connProperties = new Properties();
-        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "rups15.eatmeat.ru");
-        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "02");
-        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "PRD");
-        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "500");
-        connProperties.setProperty(DestinationDataProvider.JCO_USER, "BGD_ADMIN");
-        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "123qweASD");
-        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "RU");
+        connProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_USER, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "");
+        connProperties.setProperty(DestinationDataProvider.JCO_LANG, "");
         createDestinationDataFile(DEST, connProperties);
     }
 
