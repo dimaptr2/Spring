@@ -38,13 +38,16 @@ public class DeliveryItem implements Serializable {
     @Column(name = "net_price", precision = 20, scale = 2)
     private BigDecimal netPrice;
 
+    @Column(name = "gross_price", precision = 20, scale = 2)
+    private BigDecimal grossPrice;
+
     public DeliveryItem() { }
 
     public DeliveryItem(long id, long position,
                         long materialId, String description,
                         BigDecimal quantity, BigDecimal price,
-                        BigDecimal vat, int vatRate,
-                        BigDecimal netPrice) {
+                        BigDecimal vat, int vatRate, BigDecimal netPrice,
+                        BigDecimal grossPrice) {
         this.id = id;
         this.position = position;
         this.materialId = materialId;
@@ -54,6 +57,7 @@ public class DeliveryItem implements Serializable {
         this.vat = vat;
         this.vatRate = vatRate;
         this.netPrice = netPrice;
+        this.grossPrice = grossPrice;
     }
 
     public long getId() {
@@ -126,6 +130,14 @@ public class DeliveryItem implements Serializable {
 
     public void setNetPrice(BigDecimal netPrice) {
         this.netPrice = netPrice;
+    }
+
+    public BigDecimal getGrossPrice() {
+        return grossPrice;
+    }
+
+    public void setGrossPrice(BigDecimal grossPrice) {
+        this.grossPrice = grossPrice;
     }
 
     @Override

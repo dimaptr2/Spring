@@ -4,6 +4,7 @@ import com.sap.conn.jco.JCoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.velkomfood.fin.cash.server.model.master.Material;
+import ru.velkomfood.fin.cash.server.model.transaction.CashDocument;
 import ru.velkomfood.fin.cash.server.model.transaction.DeliveryHead;
 import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItem;
 
@@ -56,12 +57,14 @@ public class DataFather {
 
     public void takeNewDocuments() throws SQLException, JCoException {
 
+        dbEngine.refreshTransactionData();
+
         long dt1 = new Date().getTime(); // Current day in milliseconds
         final long DAY_IN_MS = 86400000; // A day in milliseconds
 
-        long dates[] = new long[8];
+        long dates[] = new long[10];
 
-        for (int i = 7; i >= 0; i--) {
+        for (int i = 9; i >= 0; i--) {
             dates[i] = dt1;
             dt1 = dt1 - DAY_IN_MS;
         }
@@ -69,6 +72,7 @@ public class DataFather {
         for (long value: dates) {
             java.sql.Date d = new java.sql.Date(value);
             getCashDocuments(d, d);
+            calculateTotalAmount(d);
         }
 
     }
@@ -88,33 +92,13 @@ public class DataFather {
         long now = new Date().getTime();
         java.sql.Date d = new java.sql.Date(now);
         getCashDocuments(d, d);
+        calculateTotalAmount(d);
 
     }
 
-    public void processNullAmounts() {
+    private void calculateTotalAmount(java.sql.Date dt1) {
 
-        Map<Long, List<DeliveryItem>> deliveryMap = dbEngine.readDeliveriesWithNullAmount();
-
-        if (deliveryMap != null && !deliveryMap.isEmpty()) {
-            Iterator<Map.Entry<Long, List<DeliveryItem>>> it = deliveryMap.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Long, List<DeliveryItem>> entry = it.next();
-                long key = entry.getKey();
-                List<DeliveryItem> value = entry.getValue();
-                if (value != null && !value.isEmpty()) {
-                    DeliveryHead head = dbEngine.readDeliveryHeadByKey(key);
-                    if (head != null) {
-                        BigDecimal amount = calculateNetSum(value);
-                        head.setTotalAmount(amount);
-                        dbEngine.saveDeliveryHead(head);
-                    }
-                }
-            }
-        }
-
-    }
-
-    public void processReturningDeliveries(java.sql.Date dt1, java.sql.Date dt2) {
+        dbEngine.updateTotalAmountsByDate(dt1);
 
     }
 
@@ -145,48 +129,12 @@ public class DataFather {
     private void getCashDocuments(java.sql.Date d1, java.sql.Date d2) throws SQLException, JCoException {
 
         sapEngine.readCashDocumentsByDate(d1, d2);
-        deleteNullableQuantities();
+//        deleteNullableQuantities();
 
     }
 
     private void deleteNullableQuantities() throws SQLException {
         dbEngine.deleteZerosDeliveryItems();
-    }
-
-
-    private BigDecimal calculateNetSum(List<DeliveryItem> listItems) {
-
-        BigDecimal sum = new BigDecimal(0.00);
-
-        for (DeliveryItem di: listItems) {
-            sum = sum.add(di.getNetPrice());
-        }
-
-        return sum;
-    }
-
-    private BigDecimal calculateGrossSum(List<DeliveryItem> listItems) {
-
-        BigDecimal sum = new BigDecimal(0.00);
-        // Rates of VAT
-        final BigDecimal VAT10 = new BigDecimal(0.10);
-        final BigDecimal VAT18 = new BigDecimal(0.18);
-        final BigDecimal UNIT = new BigDecimal(1.00);
-
-        for (DeliveryItem di: listItems) {
-
-            switch (di.getVatRate()) {
-                case 10:
-                    sum = sum.add(di.getPrice().multiply(di.getQuantity()).multiply(UNIT.add(VAT10)));
-                    break;
-                case 18:
-                    sum = sum.add(di.getPrice().multiply(di.getQuantity()).multiply(UNIT.add(VAT18)));
-                    break;
-            }
-
-        }
-
-        return sum;
     }
 
 }

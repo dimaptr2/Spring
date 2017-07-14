@@ -1,5 +1,6 @@
 package ru.velkomfood.fin.cash.server.model.transaction;
 
+import javax.persistence.Column;
 import java.math.BigDecimal;
 
 /**
@@ -7,29 +8,16 @@ import java.math.BigDecimal;
  */
 public class PriceInfo {
 
+    @Column(name = "delivery_id")
     private long deliveryId;
-    private long position;
-    private long materialId;
-    private BigDecimal price;
-    private BigDecimal netValue;
-    private BigDecimal vat;
+    @Column(name = "gross")
     private BigDecimal grossValue;
-    private int vatRate;
 
     public PriceInfo() { }
 
-    public PriceInfo(long deliveryId, long position,
-                     long materialId, BigDecimal price,
-                     BigDecimal netValue, BigDecimal vat,
-                     BigDecimal grossValue, int vatRate) {
+    public PriceInfo(long deliveryId, BigDecimal grossValue) {
         this.deliveryId = deliveryId;
-        this.position = position;
-        this.materialId = materialId;
-        this.price = price;
-        this.netValue = netValue;
-        this.vat = vat;
         this.grossValue = grossValue;
-        this.vatRate = vatRate;
     }
 
     public long getDeliveryId() {
@@ -40,60 +28,12 @@ public class PriceInfo {
         this.deliveryId = deliveryId;
     }
 
-    public long getPosition() {
-        return position;
-    }
-
-    public void setPosition(long position) {
-        this.position = position;
-    }
-
-    public long getMaterialId() {
-        return materialId;
-    }
-
-    public void setMaterialId(long materialId) {
-        this.materialId = materialId;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public BigDecimal getNetValue() {
-        return netValue;
-    }
-
-    public void setNetValue(BigDecimal netValue) {
-        this.netValue = netValue;
-    }
-
-    public BigDecimal getVat() {
-        return vat;
-    }
-
-    public void setVat(BigDecimal vat) {
-        this.vat = vat;
-    }
-
     public BigDecimal getGrossValue() {
         return grossValue;
     }
 
     public void setGrossValue(BigDecimal grossValue) {
         this.grossValue = grossValue;
-    }
-
-    public int getVatRate() {
-        return vatRate;
-    }
-
-    public void setVatRate(int vatRate) {
-        this.vatRate = vatRate;
     }
 
     @Override
@@ -103,17 +43,12 @@ public class PriceInfo {
 
         PriceInfo priceInfo = (PriceInfo) o;
 
-        if (deliveryId != priceInfo.deliveryId) return false;
-        if (position != priceInfo.position) return false;
-        return materialId == priceInfo.materialId;
+        return deliveryId == priceInfo.deliveryId;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (deliveryId ^ (deliveryId >>> 32));
-        result = 31 * result + (int) (position ^ (position >>> 32));
-        result = 31 * result + (int) (materialId ^ (materialId >>> 32));
-        return result;
+        return (int) (deliveryId ^ (deliveryId >>> 32));
     }
 
 }

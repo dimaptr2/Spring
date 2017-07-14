@@ -1,17 +1,23 @@
 package ru.velkomfood.fin.cash.server.persistence;
 
 import com.sap.conn.jco.JCoException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.stereotype.Component;
 import ru.velkomfood.fin.cash.server.model.master.*;
 import ru.velkomfood.fin.cash.server.model.transaction.*;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -297,6 +303,15 @@ public class DBEngine {
     }
 
     // Transaction data processing
+
+    public void refreshTransactionData() {
+        iCashDocumentRepository.deleteAll();
+        iDeliveryHeadRepository.deleteAll();
+        iDeliveryItemRepository.deleteAll();
+        iDistributedHeadRepository.deleteAll();
+        iDistributedItemRepository.deleteAll();
+    }
+
     // Cash Documents
 
     public void saveCashDocument(CashDocument doc) {
@@ -323,7 +338,7 @@ public class DBEngine {
         return iCashDocumentRepository.findCashDocumentByPostingDateBetween(fromDate, toDate);
     }
 
-    // Outgoing deliveries
+    // Outbound deliveries
 
     public DeliveryHead readDeliveryHeadByKey(long id) {
         return iDeliveryHeadRepository.findDeliveryHeadById(id);
@@ -376,8 +391,46 @@ public class DBEngine {
         return iDeliveryItemRepository.findDeliveryItemById(key);
     }
 
+    public void deleteDeliveryItem(DeliveryItem deliveryItem) {
+        iDeliveryItemRepository.delete(deliveryItem);
+    }
+
     public List<DeliveryItem> readAllDeliveries() {
         return iDeliveryItemRepository.findAll();
+    }
+
+    public List<DeliveryHead> readDeliveriesHeadsByDate(java.sql.Date d) {
+        return iDeliveryHeadRepository.findDeliveryHeadByPostingDateEquals(d);
+    }
+
+    public List<DeliveryHead> readDeliveriesHeadsBetweenDates(java.sql.Date d1, java.sql.Date d2) {
+        return iDeliveryHeadRepository.findDeliveryHeadByPostingDateBetween(d1, d2);
+    }
+
+    // Get a total gross amount by delivery number
+    public void updateTotalAmountsByDate(java.sql.Date d) {
+
+        List<Long> heads = new ArrayList<>();
+
+        List<CashDocument> docs = iCashDocumentRepository.findCashDocumentByPostingDate(d);
+        // Read all numbers of outbound deliveries
+        docs.forEach(doc -> {
+            heads.add(doc.getDeliveryId());
+        });
+
+        for (long id: heads) {
+            double sum = 0.00;
+            DeliveryHead dh = iDeliveryHeadRepository.findDeliveryHeadById(id);
+            if (dh != null) {
+                List<DeliveryItem> its = iDeliveryItemRepository.findDeliveryItemById(id);
+                for (DeliveryItem di: its) {
+                    sum = sum + di.getGrossPrice().doubleValue();
+                }
+                dh.setTotalAmount(BigDecimal.valueOf(sum));
+                iDeliveryHeadRepository.save(dh);
+            }
+        }
+
     }
 
     public void deleteZerosDeliveryItems() throws SQLException {
@@ -410,12 +463,13 @@ public class DBEngine {
         return iDistributedItemRepository.findDistributedItemByIdAndPosition(id, position);
     }
 
+    public List<DistributedHead> readDistributedHeadsBetweenDates(java.sql.Date d1, java.sql.Date d2) {
+        return iDistributedHeadRepository.findDistributedHeadByPostingDateBetween(d1, d2);
+    }
+
     public void saveDistributedItem(DistributedItem distributedItem) {
         iDistributedItemRepository.save(distributedItem);
     }
 
-    public void updateDeliveryItems(Set<Long> deliveries) {
-
-    }
 
 }

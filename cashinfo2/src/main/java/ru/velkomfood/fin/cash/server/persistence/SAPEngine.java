@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +30,7 @@ public class SAPEngine {
 
     private Properties connProperties;
     private JCoDestination destination;
+    private Set<DeliveryHead> heads;
 
     @Autowired
     private DBEngine dbEngine;
@@ -45,6 +45,7 @@ public class SAPEngine {
         connProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "");
         connProperties.setProperty(DestinationDataProvider.JCO_LANG, "");
         createDestinationDataFile(DEST, connProperties);
+        heads = new TreeSet<>();
     }
 
     private void createDestinationDataFile(String destName, Properties props) {
@@ -257,7 +258,7 @@ public class SAPEngine {
                             m.setVatRate(10);
                             break;
                         default:
-                            m.setVatRate(18);
+                            m.setVatRate(0);
                             break;
                     }
                     // Update or insert the material in the database
@@ -380,7 +381,6 @@ public class SAPEngine {
                                 break;
                         }
                     }
-
                     dbEngine.savePartner(p2);
                     counter++;
 
@@ -410,6 +410,16 @@ public class SAPEngine {
             sapDateTo = convertDateToSAPFormat(toDate);
         }
 
+        JCoFunction rfcShipment = destination.getRepository().getFunction("Z_RFC_GET_SHIPMENT");
+        if (rfcShipment == null) {
+            throw new RuntimeException("Function Z_RFC_GET_SHIPMENT not found");
+        }
+
+        JCoFunction rfcPricing = destination.getRepository().getFunction("Z_RFC_SD_POSITION_PRICING");
+        if (rfcPricing == null) {
+            throw new RuntimeException("Function Z_RFC_SD_POSITION_PRICING not found");
+        }
+
         JCoFunction rfcCashDoc = destination.getRepository().getFunction("Z_RFC_GET_CASHDOC");
         if (rfcCashDoc == null) {
             throw new RuntimeException("Function Z_RFC_GET_CASHDOC not found");
@@ -427,9 +437,6 @@ public class SAPEngine {
             rfcCashDoc.execute(destination);
 
             JCoTable docs = rfcCashDoc.getTableParameterList().getTable("T_CJ_DOCS");
-            JCoTable likp = rfcCashDoc.getTableParameterList().getTable("T_LIKP");
-            JCoTable lips = rfcCashDoc.getTableParameterList().getTable("T_LIPS");
-            JCoTable prInfo = rfcCashDoc.getTableParameterList().getTable("T_PRICES");
 
             if (docs.getNumRows() > 0) {
 
@@ -455,11 +462,66 @@ public class SAPEngine {
                         cd.setDeliveryId(delivery);
                         cd.setAmount(docs.getBigDecimal("H_NET_AMOUNT"));
                         dbEngine.saveCashDocument(cd);
+                        rfcShipment.getImportParameterList()
+                                .setValue("I_VBELN", alphaTransform(cd.getDeliveryId()));
+                        rfcShipment.execute(destination);
+                        JCoStructure likp = rfcShipment.getExportParameterList().getStructure("HEADER");
+                        DeliveryHead dh = new DeliveryHead();
+                        // Read an ABAP structure
+                        for (JCoField f: likp) {
+                            switch (f.getName()) {
+                                case "VBELN":
+                                    dh.setId(f.getLong());
+                                    break;
+                                case "WADAT":
+                                    dh.setPostingDate(java.sql.Date.valueOf(f.getString()));
+                                    break;
+                                case "KUNAG":
+                                    String customer = "1-" + f.getString();
+                                    dh.setPartnerId(customer);
+                                    break;
+                            }
+                        }
+                        dh.setCompanyId(cd.getCompanyId());
+                        dh.setDeliveryTypeId(2); // outbound delivery
+                        dh.setTotalAmount(new BigDecimal(0.00));
+                        dbEngine.saveDeliveryHead(dh);
+                        DistributedHead ds = copyDeliveryHead(dh);
+                        dbEngine.saveDistributedHead(ds);
+                        JCoTable lips = rfcShipment.getTableParameterList().getTable("ITEMS");
+                        if (lips.getNumRows() > 0) {
+                            do {
+                                DeliveryItem di = new DeliveryItem();
+                                double quantity = lips.getDouble("LFIMG");
+                                if (quantity == 0.000) {
+                                    continue;
+                                }
+                                di.setId(lips.getLong("VBELN"));
+                                String pos = lips.getString("POSNR");
+                                di.setPosition(Long.parseLong(pos));
+                                di.setMaterialId(lips.getLong("MATNR"));
+                                di.setDescription(lips.getString("ARKTX"));
+                                di.setQuantity(BigDecimal.valueOf(quantity));
+                                rfcPricing.getImportParameterList()
+                                        .setValue("I_VBELN", alphaTransform(di.getId()));
+                                rfcPricing.getImportParameterList()
+                                        .setValue("I_POSNR", pos);
+                                rfcPricing.execute(destination);
+                                di.setGrossPrice(rfcPricing.getExportParameterList().getBigDecimal("E_GROSS"));
+                                di.setVat(rfcPricing.getExportParameterList().getBigDecimal("E_VAT"));
+                                di.setNetPrice(rfcPricing.getExportParameterList().getBigDecimal("E_NET"));
+                                di.setPrice(rfcPricing.getExportParameterList().getBigDecimal("E_PRICE"));
+                                Material matMas = dbEngine.readMaterialByKey(di.getMaterialId());
+                                if (matMas != null) {
+                                    di.setVatRate(matMas.getVatRate());
+                                }
+                                dbEngine.saveDeliveryItem(di);
+                            } while (lips.nextRow());
+                        }
                     }
 
                 } while (docs.nextRow());
-                readDeliveryHeadFromCashDoc(likp, "1000");
-                readDeliveryItemFromCashDoc(lips);
+
             } // number rows
 
         } finally {
@@ -470,119 +532,18 @@ public class SAPEngine {
 
     } // cash documents, deliveries
 
+    private DistributedHead copyDeliveryHead(DeliveryHead head) {
+        DistributedHead ds = new DistributedHead();
+        ds.setId(head.getId());
+        ds.setDeliveryTypeId(head.getDeliveryTypeId());
+        ds.setCompanyId(head.getCompanyId());
+        ds.setPartnerId(head.getPartnerId());
+        ds.setPostingDate(head.getPostingDate());
+        ds.setTotalAmount(head.getTotalAmount());
+        return ds;
+    }
+
     // Additional methods
-
-    private void readDeliveryHeadFromCashDoc(JCoTable likp, String companyCode) throws JCoException {
-
-        final BigDecimal ZERO = new BigDecimal(0.00);
-
-        if (likp.getNumRows() > 0) {
-
-            do {
-                DeliveryHead dh = new DeliveryHead();
-                DistributedHead ds = new DistributedHead();
-                dh.setId(likp.getLong("VBELN"));
-                ds.setId(dh.getId());
-                dh.setDeliveryTypeId(2);   // outbound delivery
-                ds.setDeliveryTypeId(2);
-                dh.setCompanyId(companyCode);
-                ds.setCompanyId(companyCode);
-                String customer = "1-" + likp.getString("KUNAG");
-                dh.setPartnerId(customer);
-                ds.setPartnerId(customer);
-                java.util.Date dt = likp.getDate("WADAT");
-                java.sql.Date sdt = new java.sql.Date(dt.getTime());
-                dh.setPostingDate(sdt);
-                ds.setPostingDate(sdt);
-                dh.setTotalAmount(ZERO);
-                ds.setTotalAmount(ZERO);
-                dbEngine.saveDeliveryHead(dh);
-                dbEngine.saveDistributedHead(ds);
-            } while (likp.nextRow());
-
-        }
-
-    }
-
-
-    private void readDeliveryItemFromCashDoc(JCoTable lips) throws JCoException {
-
-        final double ZERO = 0.000;
-
-        if (lips.getNumRows() > 0) {
-
-            do {
-                DeliveryItem di = new DeliveryItem();
-                di.setId(lips.getLong("VBELN"));
-                di.setPosition(lips.getLong("POSNR"));
-                di.setMaterialId(lips.getLong("MATNR"));
-                di.setDescription(lips.getString("ARKTX"));
-                di.setQuantity(lips.getBigDecimal("LFIMG"));
-                di.setVat(lips.getBigDecimal("KZWI5"));
-//                di.setPrice(lips.getBigDecimal("NETPR"));
-                di.setNetPrice(lips.getBigDecimal("NETWR"));
-                Material matMas = dbEngine.readMaterialByKey(di.getMaterialId());
-                if (matMas != null) {
-                    di.setVatRate(matMas.getVatRate());
-                }
-                double quantity = di.getQuantity().doubleValue();
-                if (quantity != ZERO) {
-                    double net = di.getNetPrice().doubleValue();
-                    double price = net / quantity;
-                    di.setPrice(BigDecimal.valueOf(price));
-                }
-                dbEngine.saveDeliveryItem(di);
-            } while (lips.nextRow());
-
-        }
-
-    }
-
-    private Map<DeliveryItemId, PriceInfo> buildMapPrices(JCoTable tab) {
-
-        Map<DeliveryItemId, PriceInfo> prInfo = new ConcurrentHashMap<>();
-
-        if (tab.getNumRows() > 0) {
-            do {
-                DeliveryItemId key = new DeliveryItemId(tab.getLong("VBELN"), tab.getLong("POSNR"));
-                PriceInfo pi = new PriceInfo();
-                pi.setDeliveryId(key.getId());
-                pi.setPosition(key.getPosition());
-                pi.setMaterialId(tab.getLong("MATNR"));
-                pi.setVat(tab.getBigDecimal("KZWI5"));
-                pi.setNetValue(tab.getBigDecimal("NETWR"));
-                pi.setPrice(tab.getBigDecimal("NETPR"));
-                if (!prInfo.containsKey(key)) {
-                    prInfo.put(key, pi);
-                }
-            } while (tab.nextRow());
-        }
-
-        return prInfo;
-    }
-
-    private void readPriceItemsFromCashDoc(JCoTable pr) throws JCoException {
-
-        double sum = 0.00;
-
-        if (pr.getNumRows() > 0) {
-            do {
-                PriceInfo pi = new PriceInfo();
-                pi.setDeliveryId(pr.getLong("VBELN"));
-                pi.setPosition(pr.getLong("POSNR"));
-                pi.setMaterialId(pr.getLong("MATNR"));
-                pi.setNetValue(pr.getBigDecimal("NETWR"));
-//                pi.setPrice(pr.getBigDecimal("NETPR"));
-                pi.setVat(pr.getBigDecimal("KZWI5"));
-                Material matMas = dbEngine.readMaterialByKey(pi.getMaterialId());
-                if (matMas != null) {
-                    pi.setVatRate(matMas.getVatRate());
-                }
-                pi.setGrossValue(pr.getBigDecimal("GROSS"));
-            } while (pr.nextRow());
-        }
-
-    }
 
     // Build an internal date format for SAP systems
     // You should send a date into ISO form "yyyy-MM-dd"

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import ru.velkomfood.fin.cash.server.persistence.DataFather;
 
 import javax.annotation.PostConstruct;
-import java.sql.Date;
 import java.sql.SQLException;
 
 /**
@@ -39,7 +38,7 @@ public class UploadHandler {
 
 //    representing: second, minute, hour, day, month, weekday
     // Start every day at 1 minute at 7-20 hours
-    @Scheduled(cron = "0 3 19 * * *")
+    @Scheduled(cron = "0 30 18 * * *")
     public void uploadTransactionData() {
 
         System.out.println("Ok! Start uploading task!");
@@ -52,14 +51,11 @@ public class UploadHandler {
 
     } // upload the transaction data
 
-    @Scheduled(cron = "0 */7 * * * *")
+    @Scheduled(cron = "0 2 0 * * *")
     public void uploadPeriodic() {
-
-        java.sql.Date moment = new java.sql.Date(new java.util.Date().getTime());
 
         try {
             dataFather.doDailyUploading();
-            dataFather.processReturningDeliveries(moment, moment);
         } catch (JCoException | SQLException e) {
             e.printStackTrace();
         }

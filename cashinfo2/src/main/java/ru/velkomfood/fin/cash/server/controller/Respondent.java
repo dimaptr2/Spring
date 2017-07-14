@@ -1,6 +1,5 @@
 package ru.velkomfood.fin.cash.server.controller;
 
-import com.sap.conn.jco.JCoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,7 +11,6 @@ import ru.velkomfood.fin.cash.server.persistence.DBEngine;
 import ru.velkomfood.fin.cash.server.persistence.DataFather;
 
 import java.sql.Date;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
