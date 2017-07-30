@@ -14,5 +14,6 @@ public interface ICashDocumentRepository extends CrudRepository<CashDocument, Lo
     List<CashDocument> findCashDocumentByPostingDate(java.sql.Date atDate);
     List<CashDocument> findCashDocumentByIdBetween(long low, long high);
     List<CashDocument> findCashDocumentByPostingDateBetween(java.sql.Date fromDate, java.sql.Date toDate);
+    List<CashDocument> findCashDocumentByYearBetween(int low, int high);
 
 }

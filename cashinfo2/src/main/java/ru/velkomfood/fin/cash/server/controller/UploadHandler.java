@@ -25,7 +25,7 @@ public class UploadHandler {
     }
 
 //    Run every day at 22:15 o'clock
-    @Scheduled(cron = "0 15 22 * * *")
+    @Scheduled(cron = "0 15 2 * * 1-5")
     public void uploadMasterData() {
 
         try {
@@ -38,24 +38,24 @@ public class UploadHandler {
 
 //    representing: second, minute, hour, day, month, weekday
     // Start every day at 1 minute at 7-20 hours
-    @Scheduled(cron = "0 30 18 * * *")
+    @Scheduled(cron = "0 37 13 * * *")
     public void uploadTransactionData() {
 
         System.out.println("Ok! Start uploading task!");
 
         try {
-            dataFather.takeNewDocuments();
+            dataFather.takeTransactionData(false);
         } catch (SQLException | JCoException ex2) {
             ex2.printStackTrace();
         }
 
     } // upload the transaction data
 
-    @Scheduled(cron = "0 2 0 * * *")
+    @Scheduled(cron = "0 36 13 * * 1-5")
     public void uploadPeriodic() {
 
         try {
-            dataFather.doDailyUploading();
+            dataFather.takeTransactionData(true);
         } catch (JCoException | SQLException e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package ru.velkomfood.fin.cash.server.persistence;
 
+import com.sap.conn.jco.JCoContext;
 import com.sap.conn.jco.JCoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import ru.velkomfood.fin.cash.server.model.transaction.DeliveryItem;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -54,29 +56,6 @@ public class DataFather {
 
     }
 
-
-    public void takeNewDocuments() throws SQLException, JCoException {
-
-        dbEngine.refreshTransactionData();
-
-        long dt1 = new Date().getTime(); // Current day in milliseconds
-        final long DAY_IN_MS = 86400000; // A day in milliseconds
-
-        long dates[] = new long[10];
-
-        for (int i = 9; i >= 0; i--) {
-            dates[i] = dt1;
-            dt1 = dt1 - DAY_IN_MS;
-        }
-
-        for (long value: dates) {
-            java.sql.Date d = new java.sql.Date(value);
-            getCashDocuments(d, d);
-            calculateTotalAmount(d);
-        }
-
-    }
-
     public void updateDictionaries() throws SQLException, JCoException {
 
         long n1 = sapEngine.readAllMaterialsFromSAP();
@@ -87,19 +66,100 @@ public class DataFather {
 
     }
 
-    public void doDailyUploading() throws SQLException, JCoException {
+//    public void takeNewDocuments() throws SQLException, JCoException {
+//
+//        dbEngine.refreshTransactionData();
+//
+//        long dt1 = new Date().getTime(); // Current day in milliseconds
+//        final long DAY_IN_MS = 86400000; // A day in milliseconds
+//
+//        long dates[] = new long[30];
+//
+//        for (int i = 29; i >= 0; i--) {
+//            dates[i] = dt1;
+//            dt1 = dt1 - DAY_IN_MS;
+//        }
+//
+//        for (long value: dates) {
+//            java.sql.Date d = new java.sql.Date(value);
+//            getCashDocuments(d, d);
+//            calculateTotalAmount(d);
+//        }
+//
+//    }
 
-        long now = new Date().getTime();
-        java.sql.Date d = new java.sql.Date(now);
-        getCashDocuments(d, d);
-        calculateTotalAmount(d);
+
+//    public void doDailyUploading() throws SQLException, JCoException {
+//
+//        long now = new Date().getTime();
+//        java.sql.Date d = new java.sql.Date(now);
+//        getCashDocuments(d, d);
+//        calculateTotalAmount(d);
+//
+//    }
+
+    // get transaction data
+    public void takeTransactionData(boolean daily) throws JCoException, SQLException {
+
+        List<CashDocument> docs;
+
+        long mom = new Date().getTime();
+
+        long t1 = new Date().getTime();
+
+        try {
+
+            JCoContext.begin(sapEngine.getDestination());
+
+            if (daily) {
+
+                java.sql.Date dt = new java.sql.Date(mom);
+                dbEngine.saveCashDocumentsByQueue(
+                        sapEngine.readCashDocumentsBetweenDates(dt, dt)
+                );
+                docs = dbEngine.readCashDocumentsByDateBetween(dt, dt);
+
+            } else {
+
+                long dates[] = buildDateRange(mom);
+                for (long t : dates) {
+                    java.sql.Date dt = new java.sql.Date(t);
+                    dbEngine.saveCashDocumentsByQueue(
+                            sapEngine.readCashDocumentsBetweenDates(dt, dt)
+                    );
+                }
+                LocalDate now = LocalDate.now();
+                docs = dbEngine.readCashDocumentsByYearBetween(now.getYear(), now.getYear());
+
+            }
+
+            sapEngine.readDeliveriesByCashDocuments(docs);
+
+        } finally {
+
+            JCoContext.end(sapEngine.getDestination());
+
+        }
+
+        long t2 = new Date().getTime();
+
+        System.out.println("Transaction data is uploaded");
+        showMessageAboutExecutionTime(t1, t2);
 
     }
 
-    private void calculateTotalAmount(java.sql.Date dt1) {
+    private long[] buildDateRange(long value) {
 
-        dbEngine.updateTotalAmountsByDate(dt1);
+        final long DAY_IN_MS = 86400000; // A day in milliseconds
 
+        long dates[] = new long[30];
+
+        for (int i = 29; i >= 0; i--) {
+            dates[i] = value;
+            value = value - DAY_IN_MS;
+        }
+
+        return dates;
     }
 
     private void showMessageAboutExecutionTime(long m1, long m2) {
@@ -123,18 +183,6 @@ public class DataFather {
     // Calculate the time interval in the seconds
     private long calculateInterval(long x1, long x2) {
         return (x2 - x1) / 1000;
-    }
-
-    // Get all documents
-    private void getCashDocuments(java.sql.Date d1, java.sql.Date d2) throws SQLException, JCoException {
-
-        sapEngine.readCashDocumentsByDate(d1, d2);
-//        deleteNullableQuantities();
-
-    }
-
-    private void deleteNullableQuantities() throws SQLException {
-        dbEngine.deleteZerosDeliveryItems();
     }
 
 }

@@ -5,6 +5,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 import org.springframework.stereotype.Component;
 import ru.velkomfood.fin.cash.server.model.master.*;
@@ -17,10 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,6 +31,7 @@ public class DBEngine {
     private SAPEngine sapEngine;
 
     @Autowired
+    @Qualifier("myDataSource")
     private DataSource dataSource;
 
     // master data
@@ -314,6 +313,21 @@ public class DBEngine {
 
     // Cash Documents
 
+    public void saveCashDocumentsByQueue(Queue<CashDocument> docs) {
+
+        for (int j = (docs.size() - 1); j >= 0; j--) {
+            CashDocument cd = docs.poll();
+            if (cd != null) {
+                CashDocument cashDocument = iCashDocumentRepository.findOne(cd.getId());
+                if (cashDocument != null) {
+                    continue;
+                }
+                saveCashDocument(cd);
+            }
+        }
+
+    }
+
     public void saveCashDocument(CashDocument doc) {
         iCashDocumentRepository.save(doc);
     }
@@ -332,6 +346,10 @@ public class DBEngine {
 
     public List<CashDocument> readCashDocumentsByIdBetween(long low, long high) {
         return iCashDocumentRepository.findCashDocumentByIdBetween(low, high);
+    }
+
+    public List<CashDocument> readCashDocumentsByYearBetween(int low, int high) {
+        return iCashDocumentRepository.findCashDocumentByYearBetween(low, high);
     }
 
     public List<CashDocument> readCashDocumentsByDateBetween(java.sql.Date fromDate, java.sql.Date toDate) {
@@ -382,6 +400,10 @@ public class DBEngine {
     }
 
     // Items
+
+    public DeliveryItem readOneDeliveryItemByKey(DeliveryItemId delId) {
+        return iDeliveryItemRepository.findOne(delId);
+    }
 
     public void saveDeliveryItem(DeliveryItem deliveryItem) {
         iDeliveryItemRepository.save(deliveryItem);
