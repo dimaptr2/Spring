@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE")
+    }
+}
+
+group 'ru.velkomfood.dms.cache'
+version '1.1'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
+}
+
+dependencies {
+    compile fileTree(dir: '/usr/sap/JCo', includes: ['sapidoc3.jar', 'sapjco3.jar'])
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("mysql:mysql-connector-java")
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jar {
+    baseName = project.name
+    version = project.version
+    def sapPath = '/usr/sap/JCo/sapidoc3.jar /usr/sap/JCo/sapjco3.jar'
+    manifest {
+        attributes(
+                'Class-Path': sapPath
+        )
+    }
+}
+
+//task copyNativeLibs(type: Copy) {
+//    from fileTree(dir: '/usr/sap/JCo', include: 'libsapjco3.so')
+//    into 'build/libs'
+//}
