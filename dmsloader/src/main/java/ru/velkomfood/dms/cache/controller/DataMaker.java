@@ -46,13 +46,13 @@ public class DataMaker {
         sapConnection1.setProperty(DestinationDataProvider.JCO_LANG, "");
 
         sapConnection2 = new Properties();
-        sapConnection2.setProperty(DestinationDataProvider.JCO_ASHOST, "rups14.eatmeat.ru");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_SYSNR, "01");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_R3NAME, "PRD");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_CLIENT, "500");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_USER, "BGD_ADMIN");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_PASSWD, "123qweASD");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_LANG, "RU");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_ASHOST, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_SYSNR, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_R3NAME, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_CLIENT, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_USER, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_PASSWD, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_LANG, "");
 
         contracts = new ConcurrentHashMap<>();
 
