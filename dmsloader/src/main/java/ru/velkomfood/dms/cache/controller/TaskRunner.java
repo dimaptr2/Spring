@@ -15,7 +15,7 @@ public class TaskRunner {
     @Autowired
     private DataMaker dataMaker;
 
-    @Scheduled(cron = "0 49 17 * * 1-5")
+    @Scheduled(cron = "0 14 17 * * 1-5")
     public void uploadDMSdata() {
 
         try {
@@ -37,6 +37,12 @@ public class TaskRunner {
 
         }
 
+    }
+
+    @Scheduled(cron = "0 3 0 * * *")
+    public void defineLimitedContracts() {
+        dataMaker.changeDetailData("Z_DMS_TIME");
+        dataMaker.changeDetailData("Z_DMS_READY");
     }
 
     private List<List<DMSdocument>> buildPartsForProcessing(List<DMSdocument> ids) {

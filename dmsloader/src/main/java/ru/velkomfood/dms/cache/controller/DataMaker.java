@@ -6,26 +6,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
-import ru.velkomfood.dms.cache.model.DMSdocument;
-import ru.velkomfood.dms.cache.model.Detail;
-import ru.velkomfood.dms.cache.model.IDMSdocumentRepository;
-import ru.velkomfood.dms.cache.model.IDetailRepository;
+import ru.velkomfood.dms.cache.model.*;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @EnableAsync
 public class DataMaker {
 
-    final String destinationName = "PRD";
+    final String destinationName = "";
     final String SUFFIX = ".jcoDestination";
 
     private JCoDestination destination1, destination2;
     private Properties sapConnection1, sapConnection2;
+    private Map<Long, LimitedContract> contracts;
 
     // Database entities
     @Autowired
@@ -47,13 +46,15 @@ public class DataMaker {
         sapConnection1.setProperty(DestinationDataProvider.JCO_LANG, "");
 
         sapConnection2 = new Properties();
-        sapConnection2.setProperty(DestinationDataProvider.JCO_ASHOST, "");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_SYSNR, "");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_R3NAME, "");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_CLIENT, "");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_USER, "");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_PASSWD, "");
-        sapConnection2.setProperty(DestinationDataProvider.JCO_LANG, "");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_ASHOST, "rups14.eatmeat.ru");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_SYSNR, "01");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_R3NAME, "PRD");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_CLIENT, "500");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_USER, "BGD_ADMIN");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_PASSWD, "123qweASD");
+        sapConnection2.setProperty(DestinationDataProvider.JCO_LANG, "RU");
+
+        contracts = new ConcurrentHashMap<>();
 
     }
 
@@ -181,7 +182,8 @@ public class DataMaker {
                     String value = details.getString("CHARVALUE");
                     if (value != null) {
                         detail.setValue(value);
-                        needed = true;
+                    } else {
+                        detail.setValue("deadline");
                     }
                     if (needed) {
                         iDetailRepository.save(detail);
@@ -195,6 +197,30 @@ public class DataMaker {
 
     }
 
+    @Async
+    public void changeDetailData(String param) {
+
+        List<Detail> details = iDetailRepository.findDetailByCharacteristicLike(param);
+        Iterator<Detail> it = details.iterator();
+        while (it.hasNext()) {
+            Detail dtl = it.next();
+            LimitedContract lc = new LimitedContract();
+            switch (dtl.getCharacteristic()) {
+                case "Z_DMS_EXTCONTRACT#":
+                    break;
+            }
+            contracts.put(dtl.getDocumentId(), lc);
+        }
+
+    }
+
+    private void refreshLimitedContracts() {
+
+        if (!contracts.isEmpty()) {
+            contracts.clear();
+        }
+
+    }
 
     private void showMessageAboutExecutionTime(long m1, long m2) {
 
