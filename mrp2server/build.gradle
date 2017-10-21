@@ -1,0 +1,61 @@
+group 'ru.velkomfood.services.mrp2'
+version '4.3'
+
+buildscript {
+
+    ext.spring_version = '1.5.8.RELEASE'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$spring_version")
+    }
+
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+
+    compile fileTree(dir: '/usr/sap/JCo', includes: ['sapidoc3.jar', 'sapjco3.jar'])
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile("org.springframework.boot:spring-boot-devtools")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("mysql:mysql-connector-java")
+    // JUnit for Spring
+//    compile("junit:junit")
+
+}
+
+jar {
+
+    baseName = project.name
+    version = project.version
+
+    manifest {
+        attributes(
+                'Class-Path': '/usr/sap/JCo/sapidoc3.jar /usr/sap/JCo/sapjco3.jar'
+        )
+    }
+
+}
+
+task copyNativeLibrary(type: Copy) {
+    from fileTree(dir: '/usr/sap/JCo', include: 'libsapjco3.so')
+    into 'build/libs'
+}
+
+
