@@ -7,6 +7,9 @@ import java.util.List;
 public interface IRequirementRepository extends CrudRepository<Requirement, RequirementKey> {
 
     List<Requirement> findAll();
+
+    List<Requirement> findRequirementByMaterialId(long id);
+
     List<Requirement> findRequirementByMaterialIdAndYearEquals(long id, int year);
 
     List<Requirement> findRequirementByMaterialIdAndPurchaseGroupIdAndYearAndMonthBetween(

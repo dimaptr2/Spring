@@ -9,11 +9,12 @@ import ru.velkomfood.services.mrp2.model.Requirement;
 import ru.velkomfood.services.mrp2.model.Stock;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SapReader {
 
-    final String DEST = "ERP";
+    final String DEST = "PRD";
     final String SUFFIX = ".jcoDestination";
     private JCoDestination destination;
 
@@ -36,13 +37,12 @@ public class SapReader {
     public void initDestination() throws JCoException {
 
         Properties connectProperties = new Properties();
-        connectProperties.setProperty(DestinationDataProvider.JCO_SAPROUTER, "XXX");
         connectProperties.setProperty(DestinationDataProvider.JCO_ASHOST, "XXX");
         connectProperties.setProperty(DestinationDataProvider.JCO_SYSNR, "XX");
         connectProperties.setProperty(DestinationDataProvider.JCO_R3NAME, "XXX");
         connectProperties.setProperty(DestinationDataProvider.JCO_CLIENT, "XXX");
-        connectProperties.setProperty(DestinationDataProvider.JCO_USER, "XXX");
-        connectProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "XXX");
+        connectProperties.setProperty(DestinationDataProvider.JCO_USER, "XXXXX");
+        connectProperties.setProperty(DestinationDataProvider.JCO_PASSWD, "XXXXXX");
         connectProperties.setProperty(DestinationDataProvider.JCO_LANG, "XX");
 
         createDestinationDataFile(DEST, connectProperties);
@@ -175,8 +175,11 @@ public class SapReader {
         zMard2.execute(destination);
 
         JCoTable mard = zMard2.getTableParameterList().getTable("T_MARD");
+
         if (mard.getNumRows() > 0) {
+
             do {
+
                 Stock stock = new Stock(
                         mard.getLong("MATNR"),
                         mard.getInt("LGORT"),
@@ -184,18 +187,22 @@ public class SapReader {
                         mard.getInt("LFMON"),
                         mard.getBigDecimal("LABST")
                 );
+
                 if (stock.getValue() == null) {
                     stock.setValue(alphaTransformer.getZERO());
                 }
+
                 dbWriter.saveStock(stock);
+
             } while (mard.nextRow());
+
         }
 
     }
 
     public void readRequirementsByMaterialId(long id) throws JCoException {
 
-        String purGroup = "";
+        String purGroup = "XXX";
 
         JCoFunction bapiMrp2 = bapiMap.get("MRP2_LIST");
 
@@ -216,19 +223,55 @@ public class SapReader {
             }
         }
 
+        // For the inversions of the negative requirements
+        BigDecimal minus = alphaTransformer.getMINUS_UNIT();
+
         JCoTable totals = bapiMrp2.getTableParameterList().getTable("MRP_TOTAL_LINES");
+
         if (totals.getNumRows() > 0) {
+
             do {
+
                 if (totals.getString("PER_SEGMT")
                         .equals(alphaTransformer.getPATTERN1())) {
                     continue;
                 }
+
                 Requirement requirement = new Requirement();
-                java.util.Date dt = totals.getDate("AVAIL_DATE");
+                requirement.setMaterialId(id);
+                requirement.setPurchaseGroupId(purGroup);
+
+                java.sql.Date dt = new java.sql.Date(totals.getDate("AVAIL_DATE").getTime());
+                Map<String, Integer> mapTimes = buildTimeMap(dt);
+                requirement.setYear(mapTimes.get("year"));
+                requirement.setMonth(mapTimes.get("month"));
+                // Set the value of requirement
+                requirement.setValue(minus.multiply(totals.getBigDecimal("REQMTS")));
+
+                if (requirement.getValue() == null) {
+                    requirement.setValue(alphaTransformer.getZERO());
+                }
+
                 dbWriter.saveRequirement(requirement);
+
             } while (totals.nextRow());
+
         }
 
+    }
+
+    private Map<String, Integer> buildTimeMap(java.sql.Date date) {
+
+        Map<String, Integer> times = new HashMap<>();
+
+        String[] txtDate = date.toString().split("-");
+
+        if (txtDate.length > 0) {
+            times.put("year", Integer.valueOf(txtDate[0]));
+            times.put("month", Integer.valueOf(txtDate[1]));
+        }
+
+        return times;
     }
 
 

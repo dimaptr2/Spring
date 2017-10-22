@@ -50,5 +50,9 @@ public class DbWriter {
         return iMaterialRepository.findMaterialById(key);
     }
 
+    public List<Requirement> readRequirementsByMaterialId(long id) {
+        return iRequirementRepository.findRequirementByMaterialId(id);
+    }
+
 
 }

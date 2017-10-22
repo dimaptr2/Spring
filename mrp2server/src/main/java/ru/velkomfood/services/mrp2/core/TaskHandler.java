@@ -3,15 +3,12 @@ package ru.velkomfood.services.mrp2.core;
 import com.sap.conn.jco.JCoContext;
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoException;
-import com.sap.conn.jco.JCoTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.velkomfood.services.mrp2.model.Material;
-import ru.velkomfood.services.mrp2.model.Stock;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +23,7 @@ public class TaskHandler {
     @Autowired
     private AlphaTransformer alphaTransformer;
 
-    @Scheduled(cron = "0 30 1 * * *")
+    @Scheduled(cron = "0 5 7 * * *")
     public void uploadMasterData() {
 
         long t1 = new Date().getTime();
@@ -47,14 +44,16 @@ public class TaskHandler {
 
     }
 
-    @Scheduled(cron = "0 41 1 * * *")
+    @Scheduled(cron = "0 1 */2 * * *")
     public void uploadTransactionData() {
 
         long t1 = new Date().getTime();
 
         System.out.println("Start the transaction data uploading");
+
         List<Material> materials = dbWriter.readAllMaterials();
         takeRequirementsList(materials);
+
         System.out.println("Finish the transaction data uploading");
 
         long t2 = new Date().getTime();
@@ -72,7 +71,6 @@ public class TaskHandler {
 
             LocalDate moment = LocalDate.now();
             String year = String.valueOf(moment.getYear());
-            int startPoint = moment.getMonthValue();
 
             Iterator<Material> it = materialList.iterator();
 
@@ -84,6 +82,8 @@ public class TaskHandler {
                 try {
 
                     JCoContext.begin(dest);
+
+                    int startPoint = moment.getMonthValue();
 
                     while (startPoint >= 1) {
                         String month = alphaTransformer.transformMonthToString(startPoint);

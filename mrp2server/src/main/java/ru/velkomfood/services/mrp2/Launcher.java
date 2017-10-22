@@ -9,7 +9,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class Launcher {
 
     public static void main(String[] args) throws Exception {
+
+        // Set the local path to the native libraries
+        System.setProperty("java.library.path", "/usr/sap/JCo");
+        // Run this application
         SpringApplication.run(Launcher.class);
+
     }
 
 }

@@ -26,17 +26,14 @@ repositories {
     mavenCentral()
 }
 
-
 dependencies {
 
     compile fileTree(dir: '/usr/sap/JCo', includes: ['sapidoc3.jar', 'sapjco3.jar'])
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.springframework.boot:spring-boot-devtools")
+    compile("org.springframework.boot:spring-boot-starter")
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("mysql:mysql-connector-java")
     // JUnit for Spring
-//    compile("junit:junit")
+    compile("junit:junit")
 
 }
 
@@ -45,17 +42,19 @@ jar {
     baseName = project.name
     version = project.version
 
-    manifest {
-        attributes(
-                'Class-Path': '/usr/sap/JCo/sapidoc3.jar /usr/sap/JCo/sapjco3.jar'
-        )
-    }
+}
+
+task createDistribution(type: Copy) {
+
+    def myJar = project.name + '-' + project.version + '.jar'
+
+    from fileTree(dir: 'build/libs', include:  myJar)
+    into 'dist'
 
 }
 
-task copyNativeLibrary(type: Copy) {
-    from fileTree(dir: '/usr/sap/JCo', include: 'libsapjco3.so')
-    into 'build/libs'
+task removeDistribution(type: Delete) {
+    delete 'dist'
 }
 
 

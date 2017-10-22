@@ -13,12 +13,14 @@ public class Requirement implements Serializable {
     @Column(name = "material_id")
     private long materialId;
     @Id
+    @Column(name = "pur_group_id", length = 3)
+    private String purchaseGroupId;
+    @Id
     private int year;
     @Id
     private int month;
 
-    @Column(name = "pur_group_id", length = 3)
-    private String purchaseGroupId;
+
     @Column(precision = 20, scale = 3)
     private BigDecimal value;
 

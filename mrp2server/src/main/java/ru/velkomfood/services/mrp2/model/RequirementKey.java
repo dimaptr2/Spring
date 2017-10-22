@@ -5,14 +5,17 @@ import java.io.Serializable;
 public class RequirementKey implements Serializable {
 
     private long materialId;
+    private String purchaseGroupId;
     private int year;
     private int month;
 
     public RequirementKey() {
     }
 
-    public RequirementKey(long materialId, int year, int month) {
+    public RequirementKey(long materialId, String purchaseGroupId,
+                          int year, int month) {
         this.materialId = materialId;
+        this.purchaseGroupId = purchaseGroupId;
         this.year = year;
         this.month = month;
     }
@@ -23,6 +26,14 @@ public class RequirementKey implements Serializable {
 
     public void setMaterialId(long materialId) {
         this.materialId = materialId;
+    }
+
+    public String getPurchaseGroupId() {
+        return purchaseGroupId;
+    }
+
+    public void setPurchaseGroupId(String purchaseGroupId) {
+        this.purchaseGroupId = purchaseGroupId;
     }
 
     public int getYear() {
@@ -43,7 +54,6 @@ public class RequirementKey implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -51,12 +61,14 @@ public class RequirementKey implements Serializable {
 
         if (materialId != that.materialId) return false;
         if (year != that.year) return false;
-        return month == that.month;
+        if (month != that.month) return false;
+        return purchaseGroupId.equals(that.purchaseGroupId);
     }
 
     @Override
     public int hashCode() {
         int result = (int) (materialId ^ (materialId >>> 32));
+        result = 31 * result + purchaseGroupId.hashCode();
         result = 31 * result + year;
         result = 31 * result + month;
         return result;
