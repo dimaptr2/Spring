@@ -1,0 +1,48 @@
+group 'ru.velkomfood.beagle.services.info'
+version '4.1'
+
+buildscript {
+
+    ext {
+        spring_version = '1.5.8.RELEASE'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${spring_version}")
+    }
+
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compile.exclude module: "spring-boot-starter-tomcat"
+}
+
+dependencies {
+
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-undertow")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("mysql:mysql-connector-java")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+
+}
+
+jar {
+    baseName = project.name
+    version = project.version
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Счетчик коробок</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="frontend/jquery-ui.min.css">
+    <link rel="stylesheet" href="frontend/jquery-ui.structure.min.css">
+    <link rel="stylesheet"href="frontend/jquery-ui.theme.min.css">
+    <script src="frontend/external/jquery/jquery.js"></script>
+    <script src="frontend/jquery-ui.min.js"></script>
+    <script src="frontend/main.js"></script>
+</head>
+<body>
+<div id="data-area" class="wrapper">
+<div id="header00" class="top-header top-header1">
+<h2>Данные по отгруженным коробкам</h2>
+</div>
+    <nav id="params" class="left-panel-style">
+        <label class="label1">С даты</label>
+        <input id="fromDate" class="input1">
+        <br>
+        <label class="label1">По дату</label>
+        <input id="toDate" class="input1">
+        <br>
+        <label class="label1">Время от</label>
+        <input id="timeLow" class="input1" placeholder="hh:mm:ss">
+        <br>
+        <label class="label1">Время до</label>
+        <input id="timeHigh" class="input1" placeholder="hh:mm:ss">
+        <br>
+        <button id="btnOk" value="RUN" class="button1 button2">Выполнить</button>
+    </nav>
+    <div id="info-main" class="data-area-style">
+        <table id="main-table" class="responstable">
+            <thead id="tab-header">
+            <tr>
+                <th>Номер</th><th>Дата</th><th>Время</th>
+            </tr>
+            </thead>
+            <tbody id="tab-body">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
