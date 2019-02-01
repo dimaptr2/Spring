@@ -1,0 +1,53 @@
+buildscript {
+    ext {
+        spring_boot_version = '2.1.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_version")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group 'ru.velkomfood.sap.tv.server4'
+version '8.1.1'
+
+def sapPath = '/usr/sap/JCo'
+def sapJavaConnectorName = 'sapjco3.jar'
+def sapJcoClasspath = sapPath + '/' + sapJavaConnectorName
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    // exclude Apache Tomcat
+    compile.exclude module: 'spring-boot-starter-tomcat'
+}
+
+
+dependencies {
+    compileOnly fileTree(dir: sapPath, includes: [sapJavaConnectorName])
+    compile("org.springframework.boot:spring-boot-starter-web")
+    // Use Undertow instead of Tomcat
+    compile("org.springframework.boot:spring-boot-starter-undertow")
+    compile("org.springframework.boot:spring-boot-starter-freemarker")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("org.mariadb.jdbc:mariadb-java-client")
+    testCompile("junit:junit")
+}
+
+bootJar {
+    version = project.version
+    manifest.attributes('Implementation-Version' : version)
+    manifest.attributes('Class-Path' : sapJcoClasspath)
+}

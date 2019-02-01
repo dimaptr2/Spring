@@ -1,0 +1,117 @@
+.top-header {
+    margin: auto;
+    width: 50%;
+    border: 2px solid grey;
+    padding: 10px;
+}
+
+.header-style {
+    color: white;
+    font-size: 45px;
+    /*text-shadow: 2px 2px darkgray;*/
+}
+
+.back-color {
+    background-color: lightslategrey;
+    /*background-color: lightgrey;*/
+    color: white;
+    background-image: url("images/backgrnd.png");
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: auto;
+    image-orientation: from-image;
+}
+
+.center-text {
+    text-align: center;
+}
+
+/*.table-header {*/
+    /*margin: auto;*/
+    /*padding: auto;*/
+    /*width: 1050px;*/
+    /*height: auto;*/
+    /*font-size: 20px;*/
+    /*color: white;*/
+/*}*/
+
+.table-area {
+    margin: auto;
+    padding: auto;
+    width: 100%;
+    height: 70%;
+    font-size: 45px;
+    overflow: auto;
+    overflow-scrolling: auto;
+}
+
+table thead tbody {
+    width: 100%;
+    height: 70%;
+}
+
+table, thead, tbody, th, tr, td {
+    border: 1px solid white;
+    align-content: center;
+    border-collapse: collapse;
+    text-align: center;
+    border-spacing: 1.0rem;
+}
+
+/* Zebra stripped rows in the table */
+tr:nth-child(even) {
+    background-color: ghostwhite;
+    color: black;
+}
+
+.table-header-color {
+    background-color: darkgoldenrod;
+    color: black;
+}
+
+.table-caption-style {
+    font-size: 45px;
+    font-weight: bolder;
+}
+
+.table-header-position {
+    position: fixed;
+}
+
+.special-header-color {
+    color: black;
+    font-weight: bolder;
+}
+
+.table-body-style {
+    background-color: ghostwhite;
+    color: darkblue;
+}
+
+.fixed-body {
+    display:block;
+}
+
+.table-layout {
+    table-layout: fixed;
+}
+
+.table-td-alignment {
+    text-align: left;
+}
+
+.footer-style {
+    margin: auto;
+    width: 70%;
+    color: white;
+    /*text-shadow: 2px 2px darkgray;*/
+    padding: 10px;
+}
+
+.signum-style {
+    color: white;
+    text-align: center;
+    border: 1px solid white;
+    background-color: darkslategray;
+    font-size: 30px;
+}
