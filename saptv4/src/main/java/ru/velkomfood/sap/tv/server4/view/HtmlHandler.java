@@ -87,6 +87,31 @@ public class HtmlHandler {
 
     @GetMapping("/debts")
     public String readInformationAboutDebts(Model model, HttpServletResponse response) {
+
+        LocalDate today = LocalDate.now();
+
+        String dateAndTimeInfo = "Задолженность по отгрузке";
+        model.addAttribute("dateAndInfo", dateAndTimeInfo);
+        LocalDate[] dates = new LocalDate[3];
+        dates[0] = today.minusDays(2);
+        dates[1] = today.minusDays(1);
+        dates[2] = today;
+        String txtDate1 = transformDateToRussianFormat(dates[0]);
+        String txtDate2 = transformDateToRussianFormat(dates[1]);
+        LocalTime timeValue = LocalTime.now();
+        // Additional information about tomorrow, evening
+        if (timeValue.isAfter(LocalTime.parse("18:00:00", timeFormatter))) {
+            txtDate2 = txtDate2 + "<br> и " + transformDateToRussianFormat(dates[2]) + " с 20:00 по 23:59";
+        }
+
+        List<MaterialTotals> materialTotals = takeInformationAboutDebts(dates, timeValue);
+        List<TotalsHtmlView> results = createResultingList(materialTotals);
+        BigDecimal[] sums = calculateSumOfList(results);
+        // Add the attributes to the HTML template
+        model.addAttribute("date1", txtDate1);
+        model.addAttribute("date2", txtDate2);
+        createHtmlTemplateWithParameters(results, model, sums, response);
+
         return "debts";
     }
 
@@ -154,6 +179,27 @@ public class HtmlHandler {
 
         return values;
     }
+
+    private List<MaterialTotals> takeInformationAboutDebts(LocalDate[] localDates, LocalTime localTime) {
+
+        final LocalTime origin = LocalTime.parse("18:00:00", timeFormatter);
+        java.sql.Date sqlDate1 = java.sql.Date.valueOf(localDates[0].toString());
+        java.sql.Date sqlDate2 = java.sql.Date.valueOf(localDates[1].toString());
+
+        List<MaterialTotals> totals = dbProcessor.selectShipmentsAtDate(sqlDate1, sqlDate2);
+
+        if (localTime.isAfter(origin)) {
+            java.sql.Date sqlDate3 = java.sql.Date.valueOf(localDates[2]);
+            java.sql.Time time1 = java.sql.Time.valueOf(createTimeAsString(timeRange.getProperty("time.low1")));
+            java.sql.Time time2 = java.sql.Time.valueOf(createTimeAsString(timeRange.getProperty("time.high1")));
+            List<MaterialTotals> additionalList = dbProcessor
+                    .selectShipmentsAtDateTimeBetween(sqlDate3, time1, time2);
+            totals.addAll(additionalList);
+        }
+
+        return totals;
+    }
+
     // Get sums at date from the database
     private BigDecimal[] calculateSumOfList(List<TotalsHtmlView> viewList) {
 

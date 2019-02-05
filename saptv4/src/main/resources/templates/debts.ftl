@@ -33,7 +33,7 @@
             <tbody id="data-area">
             <#list resultingList as item>
                 <tr>
-                    <td class="table-td-alignment">${item.id}</td>
+                    <td class="table-td-alignment">${item.material}</td>
                     <td class="table-td-alignment">${item.description}</td>
                     <#--<td>${item.date}</td>-->
                     <#--<td>${item.time}</td>-->
