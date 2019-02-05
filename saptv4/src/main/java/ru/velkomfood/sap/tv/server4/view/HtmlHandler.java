@@ -173,8 +173,12 @@ public class HtmlHandler {
 
         List<SumView> sumViewList = dbProcessor.selectSumsBetweenDates(low, high);
         if (!sumViewList.isEmpty()) {
-            values[0] = sumViewList.get(0).getQuantity();
-            values[1] = sumViewList.get(0).getInProcess();
+            if (sumViewList.get(0).getQuantity() != null) {
+                values[0] = sumViewList.get(0).getQuantity();
+            }
+            if (sumViewList.get(0).getInProcess() != null) {
+                values[1] = sumViewList.get(0).getInProcess();
+            }
         }
 
         return values;

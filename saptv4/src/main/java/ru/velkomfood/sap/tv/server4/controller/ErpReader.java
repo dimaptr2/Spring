@@ -113,6 +113,12 @@ public class ErpReader {
                 }
                 materialTotals.setTransferred(transferred);
                 materialTotals.setInProcess(calculateInProcessQuantity(quantity, packed, transferred));
+                if (materialTotals.getInProcess().doubleValue() == 0.00) {
+                    MaterialTotals entityFromDatabase = dbProcessor.entityExists(materialTotals);
+                    if (entityFromDatabase != null) {
+                        dbProcessor.deleteMaterialTotalsEntity(entityFromDatabase);
+                    }
+                }
                 dbProcessor.saveMaterialTotalsEntity(materialTotals);
             } while (totals.nextRow());
         }

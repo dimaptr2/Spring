@@ -17,7 +17,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 group 'ru.velkomfood.sap.tv.server4'
-version '8.2.1'
+version '8.2.4'
 
 // Here are classpath variables for the local dependencies
 def sapPath = '/usr/sap/JCo'

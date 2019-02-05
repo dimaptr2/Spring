@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.velkomfood.sap.tv.server4.model.MaterialTotals;
+import ru.velkomfood.sap.tv.server4.model.MaterialTotalsKey;
 import ru.velkomfood.sap.tv.server4.model.MaterialTotalsRepository;
 import ru.velkomfood.sap.tv.server4.model.SumView;
 
@@ -44,25 +45,22 @@ public class DbProcessor {
 
     public List<MaterialTotals> selectShipmentsAtDate(java.sql.Date dateLow, java.sql.Date dateHigh) {
 
-        List<MaterialTotals> materialInfoList = new ArrayList<>();
+//        List<MaterialTotals> materialInfoList = new ArrayList<>();
+//
+//        jdbcTemplate.query(queries.getProperty("read.shipments.date.between"),
+//                new Object[] {dateLow, dateHigh},
+//                (rs, rowNum) -> materialInfoList.add(createMaterialTotalsRow(rs)));
 
-        jdbcTemplate.query(queries.getProperty("read.shipments.date.between"),
-                new Object[] {dateLow, dateHigh},
-                (rs, rowNum) -> materialInfoList.add(createMaterialTotalsRow(rs)));
-
-        return materialInfoList;
+        return materialTotalsRepository.findMaterialTotalsByDateBetween(dateLow, dateHigh);
     }
 
     public List<MaterialTotals> selectShipmentsAtDateTimeBetween(java.sql.Date date,
                                                                  java.sql.Time timeLow, java.sql.Time timeHigh) {
 
-        List<MaterialTotals> resultingList = new ArrayList<>();
-
-        jdbcTemplate.query(queries.getProperty("read.shipments.date.time.between"),
-                new Object[] {date, timeLow, timeHigh},
-                (rs, rowNum) -> resultingList.add(createMaterialTotalsRow(rs)));
-
-        return resultingList;
+//                jdbcTemplate.query(queries.getProperty("read.shipments.date.time.between"),
+//                new Object[] {date, timeLow, timeHigh},
+//                (rs, rowNum) -> resultingList.add(createMaterialTotalsRow(rs)));
+        return materialTotalsRepository.findMaterialTotalsByDateAndTimeBetween(date, timeLow, timeHigh);
     }
 
     public List<SumView> selectSumsBetweenDates(java.sql.Date low, java.sql.Date high) {
@@ -76,21 +74,30 @@ public class DbProcessor {
         return values;
     }
 
+    public MaterialTotals entityExists(MaterialTotals entity) {
+        MaterialTotalsKey key = new MaterialTotalsKey(entity.getId(), entity.getDate(), entity.getTime());
+        return materialTotalsRepository.findById(key).orElse(null);
+    }
+
+    public void deleteMaterialTotalsEntity(MaterialTotals entity) {
+        materialTotalsRepository.delete(entity);
+    }
+
     // private section
 
-    private MaterialTotals createMaterialTotalsRow(ResultSet rs) throws SQLException {
-        return new MaterialTotals(
-                rs.getLong("id"),
-                rs.getDate("dt"),
-                rs.getTime("tm"),
-                rs.getString("description"),
-                rs.getString("uom"),
-                rs.getBigDecimal("packed"),
-                rs.getBigDecimal("quantity"),
-                rs.getBigDecimal("in_process"),
-                rs.getBigDecimal("transferred")
-        );
-    }
+//    private MaterialTotals createMaterialTotalsRow(ResultSet rs) throws SQLException {
+//        return new MaterialTotals(
+//                rs.getLong("id"),
+//                rs.getDate("dt"),
+//                rs.getTime("tm"),
+//                rs.getString("description"),
+//                rs.getString("uom"),
+//                rs.getBigDecimal("packed"),
+//                rs.getBigDecimal("quantity"),
+//                rs.getBigDecimal("in_process"),
+//                rs.getBigDecimal("transferred")
+//        );
+//    }
 
     private SumView createSumView(ResultSet rs) throws SQLException {
         Optional<SumView> optionalSumView = Optional

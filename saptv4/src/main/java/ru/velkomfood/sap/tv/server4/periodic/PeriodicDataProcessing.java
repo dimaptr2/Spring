@@ -38,7 +38,7 @@ public class PeriodicDataProcessing {
         LocalDateTime ts1 = LocalDateTime.now();
         LocalDate currentDate = LocalDate.now();
         // Delete all rows older than 8 days
-//        dbProcessor.refreshDataBeforeDate(java.sql.Date.valueOf(currentDate.minusDays(8)));
+//        dbProcessor.refreshDataBeforeDate(java.sql.Date.valueOf(currentDate.toString()));
         LocalDate[] rangeDates = buildRangeDates(currentDate);
 
         try {
